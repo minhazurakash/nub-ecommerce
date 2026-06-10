@@ -8,10 +8,12 @@ import {
   Mail,
   MapPin,
   Phone,
-  Twitter,
+  Truck,
+  Shield,
+  RotateCcw,
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 import { NewsletterSection } from "@/components/storefront/newsletter-section";
+import { formatPrice } from "@/lib/utils";
 
 const footerLinks = {
   shop: [
@@ -34,54 +36,75 @@ const footerLinks = {
   ],
 };
 
-const paymentMethods = ["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"];
+const paymentMethods = ["bKash", "Nagad", "Visa", "Mastercard", "COD"];
 
 const socialLinks = [
   { icon: Instagram, href: "#", label: "Instagram" },
   { icon: Facebook, href: "#", label: "Facebook" },
-  { icon: Twitter, href: "#", label: "Twitter" },
+];
+
+const trustBadges = [
+  { icon: Truck, label: `Free delivery over ${formatPrice(75)}` },
+  { icon: RotateCcw, label: "7-day easy returns" },
+  { icon: Shield, label: "Secure payments" },
 ];
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/40">
-      <div className="container-custom py-14 lg:py-16">
-        <div className="grid gap-12 lg:grid-cols-12">
+    <footer className="mt-auto border-t border-primary/20 bg-primary text-primary-foreground">
+      <div className="container-custom py-12 lg:py-16">
+        <div className="grid gap-3 sm:grid-cols-3">
+          {trustBadges.map(({ icon: Icon, label }) => (
+            <div
+              key={label}
+              className="flex items-center gap-3 rounded-xl border border-primary-foreground/15 bg-primary-foreground/8 px-4 py-3"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-foreground/15 text-primary-foreground">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="text-sm font-medium text-primary-foreground/90">
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 grid gap-10 lg:grid-cols-12 lg:gap-8">
           <div className="space-y-6 lg:col-span-4">
             <div>
               <Link href="/" className="text-2xl font-bold">
-                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                <span className="brand-wordmark text-primary-foreground">
                   Blueberry
                 </span>
               </Link>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-                Premium shopping with curated products, member-only deals, and
-                fast delivery — designed for modern shoppers.
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-primary-foreground/70">
+                Bangladesh&apos;s trusted online store — curated products,
+                exclusive deals, and fast delivery across the country.
               </p>
             </div>
 
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p className="flex items-center gap-2">
-                <Mail className="h-4 w-4 shrink-0 text-primary" />
-                hello@blueberry.store
+            <div className="space-y-3 text-sm text-primary-foreground/70">
+              <p className="flex items-center gap-3">
+                <Mail className="h-4 w-4 shrink-0 text-primary-foreground/80" />
+                hello@blueberry.com.bd
               </p>
-              <p className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-primary" />
-                +1 (800) 555-0199
+              <p className="flex items-center gap-3">
+                <Phone className="h-4 w-4 shrink-0 text-primary-foreground/80" />
+                +880 1700-000000
               </p>
-              <p className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 shrink-0 text-primary" />
-                San Francisco, CA
+              <p className="flex items-start gap-3">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary-foreground/80" />
+                Gulshan, Dhaka 1212, Bangladesh
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {socialLinks.map(({ icon: Icon, href, label }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary-foreground/15 bg-primary-foreground/8 text-primary-foreground/70 transition-colors hover:border-primary-foreground/40 hover:bg-primary-foreground/15 hover:text-primary-foreground"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -89,16 +112,18 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-4 lg:col-start-6">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-5">
             {Object.entries(footerLinks).map(([group, links]) => (
               <div key={group}>
-                <h3 className="text-sm font-semibold capitalize">{group}</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/50">
+                  {group}
+                </h3>
                 <ul className="mt-4 space-y-2.5">
                   {links.map((link) => (
                     <li key={link.href + link.label}>
                       <Link
                         href={link.href}
-                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                        className="text-sm text-primary-foreground/75 transition-colors hover:text-primary-foreground"
                       >
                         {link.label}
                       </Link>
@@ -109,23 +134,25 @@ export function Footer() {
             ))}
           </div>
 
-          <div className="lg:col-span-4">
-            <h3 className="text-sm font-semibold">Stay in the loop</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Subscribe for exclusive offers and new arrivals.
+          <div className="lg:col-span-3">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-primary-foreground/50">
+              Newsletter
+            </h3>
+            <p className="mt-3 text-sm text-primary-foreground/70">
+              Get exclusive offers and new arrivals delivered to your inbox.
             </p>
-            <NewsletterSection variant="inline" className="mt-4" />
+            <NewsletterSection variant="footer" className="mt-4" />
 
             <div className="mt-8">
-              <h3 className="flex items-center gap-2 text-sm font-semibold">
-                <CreditCard className="h-4 w-4 text-primary" />
-                We Accept
+              <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground/50">
+                <CreditCard className="h-3.5 w-3.5" />
+                Payment Methods
               </h3>
               <div className="mt-3 flex flex-wrap gap-2">
                 {paymentMethods.map((method) => (
                   <span
                     key={method}
-                    className="rounded-lg border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground"
+                    className="rounded-lg border border-primary-foreground/15 bg-primary-foreground/8 px-3 py-1.5 text-xs font-medium text-primary-foreground/75"
                   >
                     {method}
                   </span>
@@ -135,11 +162,11 @@ export function Footer() {
           </div>
         </div>
 
-        <Separator className="my-10" />
-
-        <div className="flex flex-col items-center justify-between gap-4 text-sm text-muted-foreground sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} Blueberry. All rights reserved.</p>
-          <p className="text-xs">Crafted for premium shoppers worldwide.</p>
+        <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-primary-foreground/15 pt-8 text-sm text-primary-foreground/55 sm:flex-row">
+          <p>
+            &copy; {new Date().getFullYear()} Blueberry. All rights reserved.
+          </p>
+          <p className="text-xs">Made with care in Bangladesh 🇧🇩</p>
         </div>
       </div>
     </footer>

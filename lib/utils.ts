@@ -7,10 +7,11 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPrice(price: number | string) {
   const num = typeof price === "string" ? parseFloat(price) : price;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  const formatted = new Intl.NumberFormat("en-BD", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(num);
+  return `৳${formatted}`;
 }
 
 export function slugify(text: string) {

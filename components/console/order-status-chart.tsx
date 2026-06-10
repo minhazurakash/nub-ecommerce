@@ -18,7 +18,7 @@ export type OrderStatusDataPoint = {
 
 const STATUS_COLORS: Record<string, string> = {
   PENDING: "oklch(0.75 0.15 85)",
-  SHIPPED: "oklch(0.55 0.2 275)",
+  SHIPPED: "oklch(0.44 0.11 252)",
   DELIVERED: "oklch(0.65 0.18 155)",
   CANCELLED: "oklch(0.58 0.22 25)",
 };

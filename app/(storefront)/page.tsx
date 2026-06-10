@@ -11,6 +11,7 @@ import { getTopLevelCategories } from "@/modules/categories/queries";
 import { getBrands } from "@/modules/brands/queries";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SaleCountdown } from "@/components/storefront/sale-countdown";
 
 export default async function HomePage() {
   const [featured, deals, categories, brands] = await Promise.all([
@@ -47,10 +48,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden py-16 lg:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-accent/5 to-primary/10" />
-        <div className="container-custom relative">
-          <div className="grid items-center gap-10 rounded-3xl border bg-card/80 p-8 shadow-sm backdrop-blur-sm lg:grid-cols-2 lg:p-12">
+      <section className="bg-secondary/50 py-16 lg:py-20">
+        <div className="container-custom">
+          <div className="grid items-center gap-10 rounded-2xl border border-primary/10 bg-card p-8 lg:grid-cols-2 lg:p-12">
             <div className="space-y-5">
               <Badge variant="warning" className="gap-1 text-sm">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -70,16 +70,8 @@ export default async function HomePage() {
                 </Link>
               </Button>
             </div>
-            <div className="flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-accent p-10 text-center text-primary-foreground shadow-lg">
-              <p className="text-sm font-medium uppercase tracking-widest text-primary-foreground/80">
-                Ends Soon
-              </p>
-              <div className="mt-3 font-[family-name:var(--font-poppins)] text-5xl font-bold tabular-nums md:text-6xl">
-                02:14:35
-              </div>
-              <p className="mt-2 text-sm text-primary-foreground/80">
-                Hours · Minutes · Seconds
-              </p>
+            <div className="rounded-xl bg-primary p-8 sm:p-10">
+              <SaleCountdown daysFromNow={22} />
             </div>
           </div>
         </div>

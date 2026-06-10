@@ -22,6 +22,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/shop?deals=true", label: "Deals" },
+  { href: "/shop?sort=newest", label: "New Arrivals" },
 ];
 
 function CountBadge({ count }: { count: number }) {
@@ -40,102 +41,155 @@ export function Header() {
   const wishlistCount = useAppSelector(selectWishlistCount);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-lg">
-      <div className="container-custom flex h-16 items-center gap-4 lg:h-[4.5rem]">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
-          onClick={() => dispatch(setMobileNavOpen(true))}
-          aria-label="Open menu"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-
-        <Link
-          href="/"
-          className="shrink-0 text-xl font-bold tracking-tight lg:text-2xl"
-        >
-          <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Blueberry
-          </span>
-        </Link>
-
-        <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex">
-          {navLinks.map((link) => {
-            const isActive =
-              link.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "rounded-md px-4 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+    <header className="sticky top-0 z-40 border-b border-border/50 bg-background/90 backdrop-blur-xl">
+      <div className="container-custom">
+        <div className="flex h-16 items-center gap-4 lg:h-[4.75rem]">
           <Button
             variant="ghost"
             size="icon"
+            className="lg:hidden"
+            onClick={() => dispatch(setMobileNavOpen(true))}
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+
+          <Link
+            href="/"
+            className="shrink-0 text-xl font-bold tracking-tight lg:text-2xl"
+          >
+          <span className="brand-wordmark">Blueberry</span>
+          </Link>
+
+          <nav className="hidden flex-1 items-center justify-center lg:flex">
+            <ul className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-1.5 py-1">
+              {navLinks.map((link) => {
+                const active =
+                  link.href === "/"
+                    ? pathname === "/"
+                    : link.href === "/shop"
+                      ? pathname === "/shop"
+                      : pathname.startsWith(link.href);
+
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={cn(
+                        "relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+                        active
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <button
+            type="button"
             onClick={() => dispatch(setSearchOpen(true))}
-            aria-label="Search"
+            className="hidden max-w-xs flex-1 items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-4 py-2 text-sm text-muted-foreground transition-colors hover:border-primary/30 hover:bg-muted/50 lg:flex xl:max-w-sm"
+            aria-label="Search products"
           >
-            <Search className="h-5 w-5" />
-          </Button>
+            <Search className="h-4 w-4 shrink-0" />
+            <span>Search products...</span>
+            <kbd className="ml-auto hidden rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground xl:inline">
+              ⌘K
+            </kbd>
+          </button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Account menu">
-                <User className="h-5 w-5" />
+          <div className="ml-auto flex items-center gap-0.5 sm:gap-1 lg:ml-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden"
+              onClick={() => dispatch(setSearchOpen(true))}
+              aria-label="Search"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            <div className="hidden items-center gap-0.5 rounded-full border border-border/60 bg-muted/30 p-0.5 sm:flex">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-full"
+                    aria-label="Account menu"
+                  >
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">My Account</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/login">Sign In</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9 rounded-full"
+                asChild
+                aria-label="Wishlist"
+              >
+                <Link href="/wishlist">
+                  <Heart className="h-4 w-4" />
+                  <CountBadge count={wishlistCount} />
+                </Link>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem asChild>
-                <Link href="/account">My Account</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/login">Sign In</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            asChild
-            aria-label="Wishlist"
-          >
-            <Link href="/wishlist">
-              <Heart className="h-5 w-5" />
-              <CountBadge count={wishlistCount} />
-            </Link>
-          </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9 rounded-full"
+                onClick={() => dispatch(setCartOpen(true))}
+                aria-label="Open cart"
+              >
+                <ShoppingBag className="h-4 w-4" />
+                <CountBadge count={cartCount} />
+              </Button>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            onClick={() => dispatch(setCartOpen(true))}
-            aria-label="Open cart"
-          >
-            <ShoppingBag className="h-5 w-5" />
-            <CountBadge count={cartCount} />
-          </Button>
+              <ThemeToggle className="h-9 w-9 rounded-full" />
+            </div>
 
-          <ThemeToggle className="hidden sm:flex" />
+            <div className="flex items-center gap-0.5 sm:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                asChild
+                aria-label="Wishlist"
+              >
+                <Link href="/wishlist">
+                  <Heart className="h-5 w-5" />
+                  <CountBadge count={wishlistCount} />
+                </Link>
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative"
+                onClick={() => dispatch(setCartOpen(true))}
+                aria-label="Open cart"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                <CountBadge count={cartCount} />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </header>

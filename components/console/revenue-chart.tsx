@@ -50,7 +50,7 @@ export function RevenueChart({
                 tick={{ fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `$${value}`}
+                tickFormatter={(value) => `৳${value}`}
                 className="text-muted-foreground"
               />
               <Tooltip
@@ -64,9 +64,9 @@ export function RevenueChart({
               <Line
                 type="monotone"
                 dataKey="revenue"
-                stroke="oklch(0.49 0.22 275)"
+                stroke="oklch(0.44 0.11 252)"
                 strokeWidth={2}
-                dot={{ fill: "oklch(0.49 0.22 275)", r: 3 }}
+                dot={{ fill: "oklch(0.44 0.11 252)", r: 3 }}
                 activeDot={{ r: 5 }}
               />
             </LineChart>

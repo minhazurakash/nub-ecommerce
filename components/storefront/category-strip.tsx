@@ -32,13 +32,14 @@ const categoryIcons: Record<string, LucideIcon> = {
   books: BookOpen,
 };
 
-const categoryGradients: Record<string, string> = {
-  electronics: "from-blue-600/80 to-indigo-900/80",
-  fashion: "from-rose-500/80 to-purple-800/80",
-  home: "from-amber-500/80 to-orange-800/80",
-  beauty: "from-pink-500/80 to-fuchsia-800/80",
-  sports: "from-emerald-500/80 to-teal-800/80",
-  books: "from-sky-500/80 to-blue-800/80",
+/* Muted, earthy category tones — colorful but not neon */
+const categoryColors: Record<string, string> = {
+  electronics: "bg-[oklch(0.50_0.09_235)]",
+  fashion: "bg-[oklch(0.54_0.10_18)]",
+  home: "bg-[oklch(0.56_0.09_68)]",
+  beauty: "bg-[oklch(0.52_0.08_330)]",
+  sports: "bg-[oklch(0.50_0.09_158)]",
+  books: "bg-[oklch(0.46_0.10_252)]",
 };
 
 const defaultCategories: CategoryItem[] = [
@@ -64,8 +65,7 @@ export function CategoryStrip({
       {categories.map((category, index) => {
         const slugKey = category.slug.toLowerCase();
         const Icon = category.icon ?? categoryIcons[slugKey] ?? Sparkles;
-        const gradient =
-          categoryGradients[slugKey] ?? "from-primary/80 to-accent/80";
+        const color = categoryColors[slugKey] ?? "bg-primary";
 
         return (
           <motion.div
@@ -77,7 +77,7 @@ export function CategoryStrip({
           >
             <Link
               href={`/shop?category=${category.slug}`}
-              className="group relative block overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg"
+              className="group relative block overflow-hidden rounded-xl border border-border/60 bg-card transition-colors duration-300 hover:border-primary/30"
             >
               <div className="relative aspect-[4/5] overflow-hidden">
                 {category.imageUrl ? (
@@ -86,13 +86,13 @@ export function CategoryStrip({
                     alt={category.name}
                     fill
                     sizes="(max-width: 640px) 50vw, 20vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div
                     className={cn(
-                      "flex h-full w-full items-center justify-center bg-gradient-to-br",
-                      gradient
+                      "flex h-full w-full items-center justify-center",
+                      color
                     )}
                   >
                     <Icon className="h-14 w-14 text-white/90 transition-transform duration-300 group-hover:scale-110" />

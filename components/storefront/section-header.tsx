@@ -20,7 +20,7 @@ export function SectionHeader({
   return (
     <div className={cn("flex items-end justify-between gap-4", className)}>
       <div>
-        <h2 className="section-title bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <h2 className="section-title">
           {title}
         </h2>
         {subtitle && (
@@ -30,7 +30,7 @@ export function SectionHeader({
       {href && (
         <Link
           href={href}
-          className="group inline-flex shrink-0 cursor-pointer items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-accent"
+          className="group inline-flex shrink-0 cursor-pointer items-center gap-1 text-sm font-medium text-primary underline-offset-4 transition-colors hover:text-primary/80 hover:underline"
         >
           {linkLabel}
           <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

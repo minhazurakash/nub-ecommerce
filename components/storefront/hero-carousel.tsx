@@ -6,10 +6,16 @@ import Link from "next/link";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, Truck, Shield, RotateCcw } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Truck,
+  Shield,
+  RotateCcw,
+  ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 
 export interface HeroSlide {
   id: string;
@@ -55,8 +61,8 @@ const defaultSlides: HeroSlide[] = [
 ];
 
 const trustItems = [
-  { icon: Truck, label: "Free shipping over $75" },
-  { icon: RotateCcw, label: "30-day easy returns" },
+  { icon: Truck, label: `Free delivery over ${formatPrice(75)}` },
+  { icon: RotateCcw, label: "7-day easy returns" },
   { icon: Shield, label: "Secure checkout" },
 ];
 
@@ -70,8 +76,9 @@ export function HeroCarousel({
   className,
 }: HeroCarouselProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [
-    Autoplay({ delay: 5500, stopOnInteraction: false }),
+    Autoplay({ delay: 6000, stopOnInteraction: false }),
   ]);
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
@@ -83,7 +90,10 @@ export function HeroCarousel({
 
   useEffect(() => {
     if (!emblaApi) return;
-    const onSelect = () => setSelectedIndex(emblaApi.selectedScrollSnap());
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+      setProgress(0);
+    };
     emblaApi.on("select", onSelect);
     onSelect();
     return () => {
@@ -91,119 +101,146 @@ export function HeroCarousel({
     };
   }, [emblaApi]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((p) => (p >= 100 ? 0 : p + 100 / 60));
+    }, 100);
+    return () => clearInterval(interval);
+  }, [selectedIndex]);
+
   return (
-    <section className={cn("relative", className)}>
-      <div className="relative overflow-hidden">
-        <div ref={emblaRef} className="overflow-hidden">
-          <div className="flex">
-            {slides.map((slide, slideIndex) => (
-              <div key={slide.id} className="relative min-w-0 flex-[0_0_100%]">
-                <div className="relative aspect-[21/9] min-h-[320px] w-full sm:min-h-[400px] lg:min-h-[480px]">
-                  <Image
-                    src={slide.image}
-                    alt={slide.title}
-                    fill
-                    priority={slideIndex === 0}
-                    sizes="100vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/10" />
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="container-custom">
-                      <AnimatePresence mode="wait">
-                        {selectedIndex === slideIndex && (
-                          <motion.div
-                            key={slide.id}
-                            initial={{ opacity: 0, y: 24 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -12 }}
-                            transition={{ duration: 0.5 }}
-                            className="max-w-xl space-y-5 text-white"
-                          >
-                            {slide.badge && (
-                              <Badge className="bg-white/20 text-white backdrop-blur-sm hover:bg-white/25">
-                                {slide.badge}
-                              </Badge>
-                            )}
-                            <h1 className="font-[family-name:var(--font-poppins)] text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-                              {slide.title}
-                            </h1>
-                            <p className="max-w-md text-base text-white/85 sm:text-lg">
-                              {slide.subtitle}
-                            </p>
-                            <div className="flex flex-wrap gap-3 pt-1">
-                              <Button
-                                asChild
-                                size="lg"
-                                className="bg-white text-primary hover:bg-white/90"
-                              >
-                                <Link href={slide.href}>{slide.cta}</Link>
-                              </Button>
-                              <Button
-                                asChild
-                                size="lg"
-                                variant="outline"
-                                className="border-white/40 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:text-white"
-                              >
-                                <Link href="/shop?sort=newest">New Arrivals</Link>
-                              </Button>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+    <section className={cn("bg-muted/20", className)}>
+      <div className="container-custom py-4 lg:py-6">
+        <div className="relative overflow-hidden rounded-2xl border bg-card shadow-sm lg:rounded-3xl">
+          <div ref={emblaRef} className="overflow-hidden">
+            <div className="flex">
+              {slides.map((slide, slideIndex) => (
+                <div
+                  key={slide.id}
+                  className="relative min-w-0 flex-[0_0_100%]"
+                >
+                  <div className="relative aspect-[16/7] min-h-[300px] w-full sm:min-h-[380px] lg:min-h-[440px]">
+                    <Image
+                      src={slide.image}
+                      alt={slide.title}
+                      fill
+                      priority={slideIndex === 0}
+                      sizes="(max-width: 1280px) 100vw, 1280px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
+                    <div className="absolute inset-0 flex items-end pb-10 sm:items-center sm:pb-0">
+                      <div className="w-full px-6 sm:px-10 lg:px-14">
+                        <AnimatePresence mode="wait">
+                          {selectedIndex === slideIndex && (
+                            <motion.div
+                              key={slide.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.45 }}
+                              className="max-w-lg space-y-4 text-white sm:space-y-5"
+                            >
+                              {slide.badge && (
+                                <span className="inline-flex items-center rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm">
+                                  {slide.badge}
+                                </span>
+                              )}
+                              <h1 className="font-[family-name:var(--font-poppins)] text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                                {slide.title}
+                              </h1>
+                              <p className="max-w-md text-sm text-white/80 sm:text-base">
+                                {slide.subtitle}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-3 pt-1">
+                                <Button
+                                  asChild
+                                  size="lg"
+                                  className="group rounded-full bg-white px-6 text-foreground hover:bg-white/90"
+                                >
+                                  <Link href={slide.href}>
+                                    {slide.cta}
+                                    <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                                  </Link>
+                                </Button>
+                                <Button
+                                  asChild
+                                  size="lg"
+                                  variant="ghost"
+                                  className="rounded-full text-white hover:bg-white/15 hover:text-white"
+                                >
+                                  <Link href="/shop?sort=newest">
+                                    New Arrivals
+                                  </Link>
+                                </Button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/10">
+            <div
+              className="h-full bg-white/80 transition-[width] duration-100 ease-linear"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <div className="absolute right-4 top-4 rounded-full bg-black/30 px-3 py-1 text-xs font-medium tabular-nums text-white backdrop-blur-sm sm:right-6 sm:top-6">
+            {String(selectedIndex + 1).padStart(2, "0")} /{" "}
+            {String(slides.length).padStart(2, "0")}
+          </div>
+
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute left-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 rounded-full border-0 bg-white/90 shadow-md backdrop-blur-sm hover:bg-white sm:flex"
+            onClick={scrollPrev}
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
+            className="absolute right-4 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 rounded-full border-0 bg-white/90 shadow-md backdrop-blur-sm hover:bg-white sm:flex"
+            onClick={scrollNext}
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+
+          <div className="absolute bottom-6 left-6 flex gap-1.5 sm:left-10">
+            {slides.map((slide, index) => (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => scrollTo(index)}
+                className={cn(
+                  "h-1 rounded-full transition-all duration-300",
+                  index === selectedIndex
+                    ? "w-8 bg-white"
+                    : "w-4 bg-white/40 hover:bg-white/60"
+                )}
+                aria-label={`Go to slide ${index + 1}`}
+              />
             ))}
           </div>
         </div>
 
-        <Button
-          variant="secondary"
-          size="icon"
-          className="absolute left-4 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 rounded-full shadow-lg sm:flex"
-          onClick={scrollPrev}
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          className="absolute right-4 top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 rounded-full shadow-lg sm:flex"
-          onClick={scrollNext}
-          aria-label="Next slide"
-        >
-          <ChevronRight className="h-5 w-5" />
-        </Button>
-
-        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-          {slides.map((slide, index) => (
-            <button
-              key={slide.id}
-              type="button"
-              onClick={() => scrollTo(index)}
-              className={cn(
-                "h-2 rounded-full transition-all",
-                index === selectedIndex
-                  ? "w-8 bg-white"
-                  : "w-2 bg-white/50 hover:bg-white/75"
-              )}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="border-b bg-muted/30">
-        <div className="container-custom grid grid-cols-1 gap-4 py-5 sm:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {trustItems.map(({ icon: Icon, label }) => (
             <div
               key={label}
-              className="flex items-center justify-center gap-3 text-sm font-medium text-muted-foreground"
+              className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3.5 text-sm font-medium text-muted-foreground shadow-sm"
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="h-4 w-4" />
               </span>
               {label}

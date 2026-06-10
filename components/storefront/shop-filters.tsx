@@ -4,7 +4,14 @@ import React, { useCallback, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Filter, Grid3X3, LayoutList, SlidersHorizontal, X } from "lucide-react";
+import {
+  Eye,
+  Filter,
+  Grid3X3,
+  LayoutList,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +34,8 @@ import { Badge } from "@/components/ui/badge";
 import { type ProductCardData } from "@/components/storefront/product-card";
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { productSortOptions } from "@/lib/validations/product";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { setQuickViewSlug } from "@/modules/ui/uiSlice";
 import { cn, formatPrice } from "@/lib/utils";
 
 type FilterCategory = { id: string; name: string; slug: string };
@@ -371,10 +380,11 @@ export function ShopResults({
 }
 
 function ProductListRow({ product }: { product: ProductCardData }) {
+  const dispatch = useAppDispatch();
   const displayPrice = product.discountPrice ?? product.price;
 
   return (
-    <div className="flex gap-4 rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
+    <div className="flex gap-4 rounded-xl border border-border/50 bg-card p-4 transition-colors hover:border-primary/25">
       <Link
         href={`/product/${product.slug}`}
         className="relative h-32 w-32 shrink-0 overflow-hidden rounded-lg bg-muted"
@@ -414,9 +424,19 @@ function ProductListRow({ product }: { product: ProductCardData }) {
                 </span>
               )}
           </div>
-          <Button asChild size="sm">
-            <Link href={`/product/${product.slug}`}>View Product</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => dispatch(setQuickViewSlug(product.slug))}
+            >
+              <Eye className="mr-1.5 h-3.5 w-3.5" />
+              Quick View
+            </Button>
+            <Button asChild size="sm">
+              <Link href={`/product/${product.slug}`}>View Product</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -47,7 +47,7 @@ export function MobileNav() {
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="left" className="w-full max-w-xs">
         <SheetHeader>
-          <SheetTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-left text-xl font-bold text-transparent">
+          <SheetTitle className="brand-wordmark text-left text-xl">
             Blueberry
           </SheetTitle>
         </SheetHeader>
