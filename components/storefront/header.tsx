@@ -60,23 +60,21 @@ export function Header() {
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center lg:flex">
-            <ul className="flex items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-1.5 py-1">
+            <ul className="flex items-center gap-10">
               {navLinks.map((link) => {
                 const active =
                   link.href === "/"
                     ? pathname === "/"
-                    : link.href === "/shop"
-                      ? pathname === "/shop"
-                      : pathname.startsWith(link.href);
+                    : pathname === "/shop" || pathname.startsWith("/shop");
 
                 return (
                   <li key={link.href}>
                     <Link
                       href={link.href}
                       className={cn(
-                        "relative rounded-full px-4 py-2 text-sm font-medium transition-all duration-200",
+                        "relative py-1 text-[15px] font-medium transition-colors duration-200",
                         active
-                          ? "bg-background text-foreground shadow-sm"
+                          ? "text-primary after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:rounded-full after:bg-primary"
                           : "text-muted-foreground hover:text-foreground"
                       )}
                     >

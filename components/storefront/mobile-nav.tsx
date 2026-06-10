@@ -56,7 +56,7 @@ export function MobileNav() {
             const isActive =
               link.href === "/"
                 ? pathname === "/"
-                : pathname.startsWith(link.href);
+                : pathname === "/shop" || pathname.startsWith("/shop");
             return (
               <Link
                 key={link.href}
