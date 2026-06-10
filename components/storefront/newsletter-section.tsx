@@ -65,12 +65,12 @@ export function NewsletterSection({
   return (
     <section className={className}>
       <div className="container-custom">
-        <div className="rounded-2xl border border-primary/15 bg-secondary/40 px-6 py-12 sm:px-12 sm:py-14">
+        <div className="rounded-2xl border border-primary/15 bg-secondary/40 px-4 py-10 sm:px-8 sm:py-12 lg:px-12 lg:py-14">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
               Newsletter
             </p>
-            <h2 className="mt-3 font-[family-name:var(--font-poppins)] text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h2 className="mt-3 font-[family-name:var(--font-poppins)] text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
               Stay updated on new arrivals
             </h2>
             <p className="mx-auto mt-3 max-w-lg text-base text-muted-foreground">

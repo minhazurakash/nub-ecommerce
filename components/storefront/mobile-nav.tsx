@@ -6,7 +6,6 @@ import {
   Heart,
   Home,
   LogIn,
-  Percent,
   ShoppingBag,
   Store,
   User,
@@ -28,7 +27,6 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/shop", label: "Shop", icon: Store },
-  { href: "/shop?deals=true", label: "Deals", icon: Percent },
 ];
 
 export function MobileNav() {

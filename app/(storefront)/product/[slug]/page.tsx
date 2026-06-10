@@ -9,7 +9,10 @@ import {
   getProducts,
   type ProductListItem,
 } from "@/modules/products/queries";
-import { getProductReviews } from "@/modules/reviews/queries";
+import {
+  getProductReviewCount,
+  getProductReviews,
+} from "@/modules/reviews/queries";
 
 function toProductCardData(product: ProductListItem): ProductCardData {
   return {
@@ -38,8 +41,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const [reviews, relatedResult] = await Promise.all([
+  const [reviews, reviewCount, relatedResult] = await Promise.all([
     getProductReviews(product.id),
+    getProductReviewCount(product.id),
     getProducts({
       category: product.category.slug,
       limit: 5,
@@ -90,7 +94,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               : undefined,
             stock: product.stock,
             rating: product.rating,
-            reviewCount: product.reviewCount,
+            reviewCount,
             image: primaryImage,
             brandName: product.brand?.name,
             categoryName: product.category.name,
@@ -129,7 +133,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               : undefined,
             stock: product.stock,
             rating: product.rating,
-            reviewCount: product.reviewCount,
+            reviewCount,
             image: primaryImage,
             brandName: product.brand?.name,
             categoryName: product.category.name,

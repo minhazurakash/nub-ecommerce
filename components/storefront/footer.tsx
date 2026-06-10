@@ -18,21 +18,19 @@ import { formatPrice } from "@/lib/utils";
 const footerLinks = {
   shop: [
     { label: "All Products", href: "/shop" },
-    { label: "Deals", href: "/shop?deals=true" },
-    { label: "New Arrivals", href: "/shop?sort=newest" },
     { label: "Bestsellers", href: "/shop?sort=popular" },
   ],
   support: [
-    { label: "Contact Us", href: "/shop" },
-    { label: "Shipping Info", href: "/shop" },
-    { label: "Returns", href: "/shop" },
+    { label: "Contact Us", href: "/contact" },
+    { label: "Shipping Info", href: "/shipping" },
+    { label: "Returns", href: "/returns" },
     { label: "Track Order", href: "/account/orders" },
   ],
   company: [
-    { label: "About Blueberry", href: "/shop" },
-    { label: "Careers", href: "/shop" },
-    { label: "Privacy Policy", href: "/shop" },
-    { label: "Terms of Service", href: "/shop" },
+    { label: "About Blueberry", href: "/about" },
+    { label: "Careers", href: "/careers" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms of Service", href: "/terms" },
   ],
 };
 

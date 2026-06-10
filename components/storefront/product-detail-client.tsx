@@ -57,6 +57,33 @@ interface ProductDetailClientProps {
   section?: "purchase" | "details" | "all";
 }
 
+function isHtmlDescription(text: string) {
+  return /<[a-z][\s\S]*>/i.test(text.trim());
+}
+
+function ProductDescription({ description }: { description: string }) {
+  if (!description.trim()) {
+    return (
+      <p className="text-sm text-muted-foreground">No description available.</p>
+    );
+  }
+
+  if (isHtmlDescription(description)) {
+    return (
+      <div
+        className="text-sm leading-relaxed text-muted-foreground [&_a]:text-primary [&_a]:underline [&_li]:ml-5 [&_ol]:my-3 [&_ol]:list-decimal [&_p+p]:mt-3 [&_p]:leading-relaxed [&_strong]:font-semibold [&_ul]:my-3 [&_ul]:list-disc"
+        dangerouslySetInnerHTML={{ __html: description }}
+      />
+    );
+  }
+
+  return (
+    <p className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+      {description}
+    </p>
+  );
+}
+
 function StarRating({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -193,7 +220,9 @@ export function ProductDetailClient({
           <div className="flex items-center gap-3">
             <StarRating rating={product.rating} />
             <span className="text-sm text-muted-foreground">
-              {product.rating.toFixed(1)} ({product.reviewCount} reviews)
+              {product.reviewCount > 0
+                ? `${product.rating.toFixed(1)} (${product.reviewCount} ${product.reviewCount === 1 ? "review" : "reviews"})`
+                : "No reviews yet"}
             </span>
           </div>
 
@@ -323,13 +352,12 @@ export function ProductDetailClient({
         <TabsList>
           <TabsTrigger value="description">Description</TabsTrigger>
           <TabsTrigger value="reviews">
-            Reviews ({product.reviewCount})
+            Reviews
+            {product.reviewCount > 0 ? ` (${product.reviewCount})` : ""}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="description" className="mt-4">
-          <div className="prose prose-sm max-w-none text-muted-foreground">
-            <p className="whitespace-pre-wrap">{product.description}</p>
-          </div>
+          <ProductDescription description={product.description} />
         </TabsContent>
         <TabsContent value="reviews" className="mt-4">
           {reviews.length === 0 ? (

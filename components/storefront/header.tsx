@@ -21,8 +21,6 @@ import { cn } from "@/lib/utils";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
-  { href: "/shop?deals=true", label: "Deals" },
-  { href: "/shop?sort=newest", label: "New Arrivals" },
 ];
 
 function CountBadge({ count }: { count: number }) {

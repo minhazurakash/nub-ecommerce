@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Moon, Sun, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -91,10 +92,10 @@ export function ConsoleHeader({
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <a href="/account" className="cursor-pointer">
+              <Link href="/account" className="cursor-pointer">
                 <User className="h-4 w-4" />
                 Account
-              </a>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

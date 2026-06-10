@@ -38,7 +38,7 @@ function CountdownUnit({
 }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-primary-foreground/20 bg-primary-foreground/12 text-2xl font-bold tabular-nums text-primary-foreground sm:h-[4.5rem] sm:w-[4.5rem] sm:text-3xl">
+      <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-primary-foreground/20 bg-primary-foreground/12 text-lg font-bold tabular-nums text-primary-foreground min-[400px]:h-14 min-[400px]:w-14 min-[400px]:text-xl sm:h-[4.5rem] sm:w-[4.5rem] sm:text-3xl">
         {value}
       </div>
       <span className="mt-2 text-[10px] font-medium uppercase tracking-wider text-primary-foreground/65 sm:text-xs">
@@ -74,7 +74,7 @@ export function SaleCountdown({
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/70">
         Sale ends in
       </p>
-      <div className="mt-5 flex items-center justify-center gap-2.5 sm:gap-3">
+      <div className="mt-4 flex items-center justify-center gap-1.5 min-[400px]:mt-5 min-[400px]:gap-2.5 sm:gap-3">
         <CountdownUnit value={pad(timeLeft.days)} label="Days" />
         <span className="mb-6 text-xl font-light text-primary-foreground/35">
           :

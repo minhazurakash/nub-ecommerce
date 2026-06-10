@@ -107,7 +107,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
       )}
     >
       <div className="relative aspect-square overflow-hidden bg-muted">
-        <Link href={`/product/${product.slug}`} className="block h-full">
+        <Link
+          href={`/product/${product.slug}`}
+          className="absolute inset-0 z-0"
+          aria-label={product.title}
+        >
           <Image
             src={product.image}
             alt={product.title}
@@ -117,38 +121,41 @@ export function ProductCard({ product, className }: ProductCardProps) {
           />
         </Link>
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-foreground/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-foreground/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
         {hasDiscount && (
-          <Badge variant="warning" className="absolute left-3 top-3 z-10">
+          <Badge variant="warning" className="absolute left-3 top-3 z-[2]">
             -{discountPercent}%
           </Badge>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 z-10 translate-y-0 px-3 pb-3 transition-transform duration-300 ease-out lg:translate-y-full lg:group-hover:translate-y-0">
-          <div className="flex items-center gap-1.5 rounded-lg border border-border/40 bg-background/90 p-1.5 shadow-sm backdrop-blur-md">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] translate-y-0 px-2 pb-2 transition-transform duration-300 ease-out sm:px-3 sm:pb-3 lg:translate-y-full lg:group-hover:translate-y-0">
+          <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-border/40 bg-background/95 p-1.5 shadow-sm backdrop-blur-md sm:gap-2">
             <Button
+              type="button"
               size="sm"
               variant="secondary"
-              className="h-8 flex-1 gap-1.5 text-xs font-medium"
+              className="h-10 min-h-10 flex-1 gap-1.5 text-xs font-medium sm:h-9 sm:min-h-9"
               onClick={handleQuickView}
             >
-              <Eye className="h-3.5 w-3.5" />
-              Quick View
+              <Eye className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              <span className="hidden min-[380px]:inline">Quick View</span>
+              <span className="min-[380px]:hidden">View</span>
             </Button>
             <Button
+              type="button"
               size="icon"
               variant="secondary"
-              className="h-8 w-8 shrink-0"
+              className="h-10 w-10 min-h-10 min-w-10 shrink-0 sm:h-9 sm:w-9 sm:min-h-9 sm:min-w-9"
               onClick={handleAddToCart}
               aria-label="Add to cart"
             >
-              <ShoppingBag className="h-3.5 w-3.5" />
+              <ShoppingBag className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
             </Button>
             <Button
-              size="icon"
+              type="button"
               variant="secondary"
-              className="h-8 w-8 shrink-0"
+              className="h-10 w-10 min-h-10 min-w-10 shrink-0 sm:h-9 sm:w-9 sm:min-h-9 sm:min-w-9"
               onClick={handleToggleWishlist}
               aria-label={
                 inWishlist ? "Remove from wishlist" : "Add to wishlist"
@@ -156,14 +163,13 @@ export function ProductCard({ product, className }: ProductCardProps) {
             >
               <Heart
                 className={cn(
-                  "h-3.5 w-3.5",
+                  "h-4 w-4 sm:h-3.5 sm:w-3.5",
                   inWishlist && "fill-destructive text-destructive"
                 )}
               />
             </Button>
           </div>
         </div>
-
       </div>
 
       <Link
