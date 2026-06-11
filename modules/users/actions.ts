@@ -18,7 +18,8 @@ export async function updateUserRole(formData: FormData) {
   if (userId === currentUser.id && role !== Role.ADMIN) return;
 
   const db = getDb();
-  await db.from("users").update({ role }).eq("id", userId);
+  const { error } = await db.from("users").update({ role }).eq("id", userId);
+  if (error) throw error;
 
   revalidatePath("/console/users");
 }

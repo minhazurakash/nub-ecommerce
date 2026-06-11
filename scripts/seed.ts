@@ -8,6 +8,7 @@ import { faker } from "@faker-js/faker";
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "crypto";
 import { setupDatabase } from "./setup-db";
+import { ensureProductImagesBucket } from "../lib/supabase/storage";
 
 // Load .env.local then .env (same order as Next.js)
 config({ path: resolve(process.cwd(), ".env") });
@@ -56,6 +57,17 @@ function checkError(error: { message: string; code?: string } | null, step: stri
   process.exit(1);
 }
 
+async function ensureStorage() {
+  try {
+    await ensureProductImagesBucket();
+    console.log('Storage bucket "product-images" is ready.');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn("Could not create storage bucket:", message);
+    console.warn('Run "yarn db:setup-storage" after verifying SUPABASE_SERVICE_ROLE_KEY.');
+  }
+}
+
 async function ensureSchema() {
   const { error } = await db.from("users").select("id").limit(1);
   if (error?.message.includes("does not exist") || error?.code === "PGRST205") {
@@ -84,6 +96,7 @@ async function clearAll() {
 
 async function main() {
   await ensureSchema();
+  await ensureStorage();
   console.log("Clearing existing data...");
   await clearAll();
 

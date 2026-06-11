@@ -35,6 +35,7 @@ const initialState: ProductFormState = {};
 
 export function ProductForm({ product, categories, brands }: ProductFormProps) {
   const [state, formAction, isPending] = useActionState(saveProduct, initialState);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [description, setDescription] = useState(product?.description ?? "");
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? "");
   const [subcategoryId, setSubcategoryId] = useState(product?.subcategoryId ?? "");
@@ -62,7 +63,18 @@ export function ProductForm({ product, categories, brands }: ProductFormProps) {
   const defaultTags = product?.tags?.map((entry) => entry.tag.name).join(", ") ?? "";
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form
+      action={formAction}
+      className="space-y-6"
+      onSubmit={(event) => {
+        if (!categoryId) {
+          event.preventDefault();
+          setCategoryError("Please select a category.");
+        } else {
+          setCategoryError(null);
+        }
+      }}
+    >
       {product?.id ? <input type="hidden" name="id" value={product.id} /> : null}
       <input type="hidden" name="description" value={description} />
       <input type="hidden" name="isFeatured" value={isFeatured ? "on" : ""} />
@@ -79,6 +91,11 @@ export function ProductForm({ product, categories, brands }: ProductFormProps) {
       {state.error ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {state.error}
+        </div>
+      ) : null}
+      {categoryError ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {categoryError}
         </div>
       ) : null}
 
@@ -183,6 +200,7 @@ export function ProductForm({ product, categories, brands }: ProductFormProps) {
                   onValueChange={(value) => {
                     setCategoryId(value);
                     setSubcategoryId("");
+                    setCategoryError(null);
                   }}
                 >
                   <SelectTrigger>

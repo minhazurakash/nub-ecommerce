@@ -17,7 +17,8 @@ export async function updateOrderStatus(formData: FormData) {
   if (!validStatuses.includes(status)) return;
 
   const db = getDb();
-  await db.from("orders").update({ status }).eq("id", orderId);
+  const { error } = await db.from("orders").update({ status }).eq("id", orderId);
+  if (error) throw error;
 
   revalidatePath("/console/orders");
   revalidatePath(`/console/orders/${orderId}`);

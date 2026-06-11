@@ -44,9 +44,17 @@ Copy URL and keys into `.env.local`.
 
 **Authentication → Providers** → enable Email.
 
-### 3. Create storage bucket
+### 3. Storage bucket (auto-created)
 
-**Storage** → create public bucket `product-images`.
+Product image uploads use a public Supabase bucket named `product-images`. The upload action and seed script create it automatically when `SUPABASE_SERVICE_ROLE_KEY` is set.
+
+To create it manually:
+
+```bash
+yarn db:setup-storage
+```
+
+Or in the Supabase dashboard: **Storage** → create public bucket `product-images`.
 
 ### 4. Seed data (creates tables + sample data)
 

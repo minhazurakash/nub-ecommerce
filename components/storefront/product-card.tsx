@@ -109,7 +109,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Link
           href={`/product/${product.slug}`}
-          className="absolute inset-0 z-0"
+          className="absolute inset-x-0 top-0 bottom-11 z-0 sm:bottom-12 lg:inset-0"
           aria-label={product.title}
         >
           <Image
@@ -129,24 +129,33 @@ export function ProductCard({ product, className }: ProductCardProps) {
           </Badge>
         )}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] translate-y-0 px-2 pb-2 transition-transform duration-300 ease-out sm:px-3 sm:pb-3 lg:translate-y-full lg:group-hover:translate-y-0">
-          <div className="pointer-events-auto flex items-center gap-1.5 rounded-lg border border-border/40 bg-background/95 p-1.5 shadow-sm backdrop-blur-md sm:gap-2">
+        <div className="absolute inset-x-0 bottom-0 z-10 translate-y-0 px-1.5 pb-1.5 transition-transform duration-300 ease-out sm:px-2 sm:pb-2 lg:translate-y-full lg:group-hover:translate-y-0">
+          <div className="flex items-center gap-1 rounded-lg border border-border/40 bg-background/95 p-1 shadow-sm backdrop-blur-md sm:gap-1.5 sm:p-1.5">
+            <Button
+              type="button"
+              size="icon"
+              variant="secondary"
+              className="h-9 min-h-9 flex-1 sm:hidden"
+              onClick={handleQuickView}
+              aria-label="Quick view"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
             <Button
               type="button"
               size="sm"
               variant="secondary"
-              className="h-10 min-h-10 flex-1 gap-1.5 text-xs font-medium sm:h-9 sm:min-h-9"
+              className="hidden h-9 min-h-9 flex-1 gap-1.5 text-xs font-medium sm:inline-flex"
               onClick={handleQuickView}
             >
-              <Eye className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
-              <span className="hidden min-[380px]:inline">Quick View</span>
-              <span className="min-[380px]:hidden">View</span>
+              <Eye className="h-3.5 w-3.5" />
+              Quick View
             </Button>
             <Button
               type="button"
               size="icon"
               variant="secondary"
-              className="h-10 w-10 min-h-10 min-w-10 shrink-0 sm:h-9 sm:w-9 sm:min-h-9 sm:min-w-9"
+              className="h-9 min-h-9 w-9 min-w-9 flex-1 sm:h-9 sm:w-9 sm:min-w-9 sm:flex-none"
               onClick={handleAddToCart}
               aria-label="Add to cart"
             >
@@ -154,8 +163,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
             </Button>
             <Button
               type="button"
+              size="icon"
               variant="secondary"
-              className="h-10 w-10 min-h-10 min-w-10 shrink-0 sm:h-9 sm:w-9 sm:min-h-9 sm:min-w-9"
+              className="h-9 min-h-9 w-9 min-w-9 flex-1 sm:h-9 sm:w-9 sm:min-w-9 sm:flex-none"
               onClick={handleToggleWishlist}
               aria-label={
                 inWishlist ? "Remove from wishlist" : "Add to wishlist"

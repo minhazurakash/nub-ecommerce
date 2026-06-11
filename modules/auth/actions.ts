@@ -4,7 +4,18 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/supabase/db";
 import { mapUser, toUserInsert } from "@/lib/supabase/mappers";
-import { Role } from "@/lib/types/database";
+import { Role, type User } from "@/lib/types/database";
+
+function isStaffRole(role: Role) {
+  return role === Role.ADMIN || role === Role.EDITOR;
+}
+
+function getPostLoginRedirect(user: User | null, redirectTo: string) {
+  if (user && isStaffRole(user.role) && redirectTo === "/account") {
+    return "/console";
+  }
+  return redirectTo;
+}
 
 async function upsertUser(authId: string, email: string, name?: string) {
   const db = getDb();
@@ -67,15 +78,16 @@ export async function signIn(formData: FormData) {
 
   if (error) return { error: error.message };
 
+  let user: User | null = null;
   if (data.user) {
-    await upsertUser(
+    user = await upsertUser(
       data.user.id,
       data.user.email!,
       data.user.user_metadata?.name
     );
   }
 
-  redirect(redirectTo);
+  redirect(getPostLoginRedirect(user, redirectTo));
 }
 
 export async function signOut() {

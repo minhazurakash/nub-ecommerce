@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getDb } from "@/lib/supabase/db";
+import { formatDbError } from "@/lib/supabase/errors";
 import { slugify } from "@/lib/utils";
 import { requireAdmin } from "@/modules/auth/actions";
 
@@ -49,12 +50,14 @@ export async function saveCategory(
       const { error } = await db.from("categories").insert(data);
       if (error) throw error;
     }
-
-    revalidatePath("/console/categories");
-    redirect("/console/categories");
-  } catch {
-    return { error: "Failed to save category. Slug may already exist." };
+  } catch (error) {
+    return {
+      error: formatDbError(error, "Failed to save category. Slug may already exist."),
+    };
   }
+
+  revalidatePath("/console/categories");
+  redirect("/console/categories");
 }
 
 export async function deleteCategory(formData: FormData) {
@@ -63,11 +66,32 @@ export async function deleteCategory(formData: FormData) {
   if (!id) return;
 
   const db = getDb();
+
+  const { count: productCount } = await db
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .or(`category_id.eq.${id},subcategory_id.eq.${id}`);
+
+  if (productCount && productCount > 0) {
+    redirect("/console/categories?error=has-products");
+  }
+
+  const { count: childCount } = await db
+    .from("categories")
+    .select("id", { count: "exact", head: true })
+    .eq("parent_id", id);
+
+  if (childCount && childCount > 0) {
+    redirect("/console/categories?error=has-children");
+  }
+
   try {
-    await db.from("categories").delete().eq("id", id);
-    revalidatePath("/console/categories");
-    redirect("/console/categories");
+    const { error } = await db.from("categories").delete().eq("id", id);
+    if (error) throw error;
   } catch {
     redirect("/console/categories?error=delete-failed");
   }
+
+  revalidatePath("/console/categories");
+  redirect("/console/categories");
 }
