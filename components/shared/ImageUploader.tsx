@@ -22,9 +22,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, generateId } from "@/lib/utils";
+import { uploadImageFile } from "@/lib/upload-client";
 import { Button } from "@/components/ui/button";
-import { uploadImage } from "@/modules/upload/actions";
 
 export type ImageItem = {
   id: string;
@@ -146,22 +146,17 @@ export function ImageUploader({
       const uploaded: ImageItem[] = [];
 
       for (const file of filesToUpload) {
-        const formData = new FormData();
-        formData.append("file", file);
-
         try {
-          const result = await uploadImage(formData);
-          if (result.success) {
-            uploaded.push({
-              id: crypto.randomUUID(),
-              url: result.url,
-              alt: file.name,
-            });
-          } else {
-            toast.error(result.error);
-          }
-        } catch {
-          toast.error(`Failed to upload ${file.name}.`);
+          const result = await uploadImageFile(file);
+          uploaded.push({
+            id: generateId(),
+            url: result.url,
+            alt: file.name,
+          });
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : `Failed to upload ${file.name}.`;
+          toast.error(message);
         } finally {
           setUploadingCount((count) => count - 1);
         }

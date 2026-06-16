@@ -13,8 +13,15 @@ import {
   checkoutFormSchema,
   type CheckoutFormInput,
 } from "@/lib/validations/checkout";
+import {
+  calculateOrderTotals,
+} from "@/lib/pricing";
 import { requireUser } from "@/modules/auth/actions";
 import { toAddressInsert } from "@/lib/supabase/mappers";
+import {
+  incrementCouponUsage,
+  resolveCouponForOrder,
+} from "@/modules/coupons/actions";
 
 const SHIPPING_FLAT_RATE = 9.99;
 const TAX_RATE = 0.08;
@@ -46,7 +53,7 @@ export async function createOrder(
     };
   }
 
-  const { items, addressId, address, saveAddress } = parsed.data;
+  const { items, addressId, address, saveAddress, couponCode } = parsed.data;
   const db = getDb();
 
   try {
@@ -180,9 +187,11 @@ export async function createOrder(
       });
     }
 
-    const shipping = subtotal >= 75 ? 0 : SHIPPING_FLAT_RATE;
-    const tax = subtotal * TAX_RATE;
-    const total = subtotal + shipping + tax;
+    const { coupon, discount } = await resolveCouponForOrder(
+      couponCode,
+      subtotal
+    );
+    const totals = calculateOrderTotals(subtotal, discount);
     const orderNumber = generateOrderNumber();
 
     const { data: order, error: orderError } = await db
@@ -190,10 +199,13 @@ export async function createOrder(
       .insert({
         user_id: user.id,
         order_number: orderNumber,
-        subtotal,
-        shipping,
-        tax,
-        total,
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        shipping: totals.shipping,
+        tax: totals.tax,
+        total: totals.total,
+        coupon_id: coupon?.id ?? null,
+        coupon_code: coupon?.code ?? null,
         shipping_address: shippingAddress,
       })
       .select("id, order_number")
@@ -204,6 +216,10 @@ export async function createOrder(
     await db.from("order_items").insert(
       orderItems.map((item) => ({ ...item, order_id: order.id }))
     );
+
+    if (coupon) {
+      await incrementCouponUsage(coupon.id);
+    }
 
     await db
       .from("cart_items")

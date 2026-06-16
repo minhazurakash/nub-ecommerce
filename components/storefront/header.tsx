@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, Menu, Search, ShoppingBag, User } from "lucide-react";
+import { Heart, LogOut, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,9 @@ import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { selectCartCount, setCartOpen } from "@/modules/cart/cartSlice";
 import { selectWishlistCount } from "@/modules/wishlist/wishlistSlice";
 import { setMobileNavOpen, setSearchOpen } from "@/modules/ui/uiSlice";
+import { signOut } from "@/modules/auth/actions";
+import { getDashboardLabel, getDashboardPath } from "@/lib/auth";
+import { Role } from "@/lib/types/database";
 import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +35,13 @@ function CountBadge({ count }: { count: number }) {
   );
 }
 
-export function Header() {
+export function Header({
+  isLoggedIn = false,
+  userRole,
+}: {
+  isLoggedIn?: boolean;
+  userRole?: Role | null;
+}) {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const cartCount = useAppSelector(selectCartCount);
@@ -123,13 +132,27 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/account">My Account</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/login">Sign In</Link>
-                  </DropdownMenuItem>
+                  {isLoggedIn ? (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href={getDashboardPath(userRole)}>
+                          {getDashboardLabel(userRole)}
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                        onClick={() => signOut()}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem asChild>
+                      <Link href="/login">Sign In</Link>
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
 

@@ -10,6 +10,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE discount_type AS ENUM ('PERCENTAGE', 'FLAT');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   auth_id TEXT UNIQUE NOT NULL,
@@ -119,15 +124,33 @@ CREATE TABLE IF NOT EXISTS addresses (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS coupons (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  code TEXT UNIQUE NOT NULL,
+  discount_type discount_type NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  valid_from TIMESTAMPTZ NOT NULL DEFAULT now(),
+  valid_until TIMESTAMPTZ NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  max_uses INT,
+  used_count INT NOT NULL DEFAULT 0,
+  min_order_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   user_id TEXT NOT NULL REFERENCES users(id),
   order_number TEXT UNIQUE NOT NULL,
   status order_status NOT NULL DEFAULT 'PENDING',
   subtotal DECIMAL(10,2) NOT NULL,
+  discount DECIMAL(10,2) NOT NULL DEFAULT 0,
   shipping DECIMAL(10,2) NOT NULL,
   tax DECIMAL(10,2) NOT NULL,
   total DECIMAL(10,2) NOT NULL,
+  coupon_id TEXT REFERENCES coupons(id) ON DELETE SET NULL,
+  coupon_code TEXT,
   shipping_address JSONB NOT NULL,
   placed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -166,7 +189,10 @@ CREATE TABLE IF NOT EXISTS cart_items (
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_featured ON products(is_featured);
 CREATE INDEX IF NOT EXISTS idx_products_deal ON products(is_deal);
+CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
+CREATE INDEX IF NOT EXISTS idx_coupons_active ON coupons(is_active);
 CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_coupon ON orders(coupon_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
 
@@ -192,6 +218,9 @@ CREATE TRIGGER products_updated_at BEFORE UPDATE ON products FOR EACH ROW EXECUT
 
 DROP TRIGGER IF EXISTS addresses_updated_at ON addresses;
 CREATE TRIGGER addresses_updated_at BEFORE UPDATE ON addresses FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS coupons_updated_at ON coupons;
+CREATE TRIGGER coupons_updated_at BEFORE UPDATE ON coupons FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 DROP TRIGGER IF EXISTS orders_updated_at ON orders;
 CREATE TRIGGER orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at();

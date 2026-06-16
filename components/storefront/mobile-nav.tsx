@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   Heart,
   Home,
+  LayoutDashboard,
   LogIn,
+  LogOut,
   ShoppingBag,
   Store,
   User,
@@ -19,6 +21,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { signOut } from "@/modules/auth/actions";
+import { getDashboardLabel, getDashboardPath, isStaffRole } from "@/lib/auth";
+import { Role } from "@/lib/types/database";
 import { setMobileNavOpen } from "@/modules/ui/uiSlice";
 import { selectWishlistCount } from "@/modules/wishlist/wishlistSlice";
 import { ThemeToggle } from "./theme-toggle";
@@ -29,7 +34,13 @@ const navLinks = [
   { href: "/shop", label: "Shop", icon: Store },
 ];
 
-export function MobileNav() {
+export function MobileNav({
+  isLoggedIn = false,
+  userRole,
+}: {
+  isLoggedIn?: boolean;
+  userRole?: Role | null;
+}) {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.ui.mobileNavOpen);
@@ -92,22 +103,42 @@ export function MobileNav() {
               </span>
             )}
           </Link>
-          <Link
-            href="/account"
-            onClick={close}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-          >
-            <User className="h-5 w-5" />
-            Account
-          </Link>
-          <Link
-            href="/login"
-            onClick={close}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
-          >
-            <LogIn className="h-5 w-5" />
-            Sign In
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link
+                href={getDashboardPath(userRole)}
+                onClick={close}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
+              >
+                {isStaffRole(userRole) ? (
+                  <LayoutDashboard className="h-5 w-5" />
+                ) : (
+                  <User className="h-5 w-5" />
+                )}
+                {getDashboardLabel(userRole)}
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  close();
+                  signOut();
+                }}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-destructive hover:bg-muted"
+              >
+                <LogOut className="h-5 w-5" />
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              onClick={close}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium hover:bg-muted"
+            >
+              <LogIn className="h-5 w-5" />
+              Sign In
+            </Link>
+          )}
         </div>
 
         <Separator className="my-4" />

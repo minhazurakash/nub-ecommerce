@@ -4,11 +4,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getDb } from "@/lib/supabase/db";
 import { mapUser, toUserInsert } from "@/lib/supabase/mappers";
+import { isStaffRole } from "@/lib/auth";
 import { Role, type User } from "@/lib/types/database";
-
-function isStaffRole(role: Role) {
-  return role === Role.ADMIN || role === Role.EDITOR;
-}
 
 function getPostLoginRedirect(user: User | null, redirectTo: string) {
   if (user && isStaffRole(user.role) && redirectTo === "/account") {

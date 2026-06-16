@@ -24,7 +24,7 @@ export default async function AccountLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <TopBar />
-      <Header />
+      <Header isLoggedIn userRole={user.role} />
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
           <div className="flex flex-col gap-8 md:flex-row">
@@ -36,7 +36,7 @@ export default async function AccountLayout({
       <Footer />
       <CartDrawer />
       <SearchCommand />
-      <MobileNav />
+      <MobileNav isLoggedIn userRole={user.role} />
     </div>
   );
 }

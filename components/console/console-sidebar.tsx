@@ -9,6 +9,7 @@ import {
   ShoppingCart,
   Users,
   Grape,
+  Tag,
 } from "lucide-react";
 import { Role } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ const adminNavItems = [
   { href: "/console/products", label: "Products", icon: Package },
   { href: "/console/categories", label: "Categories", icon: FolderTree },
   { href: "/console/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/console/coupons", label: "Discounts", icon: Tag },
   { href: "/console/users", label: "Users", icon: Users },
 ] as const;
 

@@ -3,6 +3,8 @@ import type {
   Address,
   Brand,
   Category,
+  Coupon,
+  DiscountType,
   Order,
   OrderItem,
   OrderStatus,
@@ -132,6 +134,23 @@ export function mapTag(row: any): Tag {
   };
 }
 
+export function mapCoupon(row: any): Coupon {
+  return {
+    id: row.id,
+    code: row.code,
+    discountType: row.discount_type as DiscountType,
+    amount: num(row.amount),
+    validFrom: row.valid_from,
+    validUntil: row.valid_until,
+    isActive: bool(row.is_active),
+    maxUses: row.max_uses != null ? Number(row.max_uses) : null,
+    usedCount: row.used_count ?? 0,
+    minOrderAmount: num(row.min_order_amount),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export function mapOrder(row: any): Order {
   return {
     id: row.id,
@@ -139,9 +158,12 @@ export function mapOrder(row: any): Order {
     orderNumber: row.order_number,
     status: row.status as OrderStatus,
     subtotal: num(row.subtotal),
+    discount: num(row.discount ?? 0),
     shipping: num(row.shipping),
     tax: num(row.tax),
     total: num(row.total),
+    couponId: row.coupon_id ?? null,
+    couponCode: row.coupon_code ?? null,
     shippingAddress: row.shipping_address as Record<string, string>,
     placedAt: row.placed_at,
     updatedAt: row.updated_at,

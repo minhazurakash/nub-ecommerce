@@ -11,6 +11,11 @@ export enum OrderStatus {
   CANCELLED = "CANCELLED",
 }
 
+export enum DiscountType {
+  PERCENTAGE = "PERCENTAGE",
+  FLAT = "FLAT",
+}
+
 export type User = {
   id: string;
   authId: string;
@@ -114,15 +119,33 @@ export type Review = {
   createdAt: string;
 };
 
+export type Coupon = {
+  id: string;
+  code: string;
+  discountType: DiscountType;
+  amount: number;
+  validFrom: string;
+  validUntil: string;
+  isActive: boolean;
+  maxUses: number | null;
+  usedCount: number;
+  minOrderAmount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Order = {
   id: string;
   userId: string;
   orderNumber: string;
   status: OrderStatus;
   subtotal: number;
+  discount: number;
   shipping: number;
   tax: number;
   total: number;
+  couponId: string | null;
+  couponCode: string | null;
   shippingAddress: Record<string, string>;
   placedAt: string;
   updatedAt: string;

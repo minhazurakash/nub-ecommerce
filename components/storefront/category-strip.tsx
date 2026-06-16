@@ -48,8 +48,7 @@ const cardPastels = [
   { bg: "bg-[#e6f4f4]", icon: "text-[#3a9e9e]" },
 ];
 
-const FEATURED_IMAGE =
-  "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&h=1000&fit=crop";
+const FEATURED_IMAGE = "/banners/category-shopping.png";
 
 const AUTOPLAY_DELAY = 2800;
 
@@ -145,8 +144,7 @@ export function CategoryStrip({
 }: CategoryStripProps) {
   const items = useMemo(() => normalizeCategories(categories), [categories]);
   const loopSlides = useMemo(() => buildLoopSlides(items), [items]);
-  const featuredImage =
-    items.find((c) => c.imageUrl)?.imageUrl ?? FEATURED_IMAGE;
+  const featuredImage = FEATURED_IMAGE;
 
   const [slideMetrics, setSlideMetrics] = useState(() =>
     typeof window !== "undefined"
@@ -221,15 +219,15 @@ export function CategoryStrip({
 
       <div className="relative z-10 grid gap-6 sm:gap-8 lg:grid-cols-[minmax(260px,36%)_1fr] lg:items-stretch lg:gap-6">
         <div className="relative mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:mx-0 lg:flex lg:max-w-none lg:flex-col lg:justify-end">
-          <Link href="/shop?deals=true" className="group relative block">
+          <Link href="/shop" className="group relative block">
             <div className="relative overflow-hidden rounded-[1.75rem] lg:rounded-[2rem]">
               <div className="relative aspect-[4/5] w-full">
                 <Image
                   src={featuredImage}
-                  alt="Shop our best deals"
+                  alt="Shop by category"
                   fill
                   sizes="(max-width: 1024px) 360px, 36vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  className="object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
                 />
               </div>
             </div>
@@ -238,7 +236,7 @@ export function CategoryStrip({
               className="absolute -bottom-px right-0 z-10 hidden h-[7.5rem] w-[6.5rem] rounded-tl-[2.75rem] bg-background lg:block xl:h-[8.5rem] xl:w-[7.5rem]"
             />
             <Badge className="absolute right-4 top-4 z-20 bg-foreground px-3 py-1 text-xs font-semibold text-background">
-              50% Off
+              New Arrivals
             </Badge>
           </Link>
         </div>

@@ -26,37 +26,24 @@ export interface HeroSlide {
 
 const defaultSlides: HeroSlide[] = [
   {
-    id: "1",
-    promo: "Flat 30% Off",
-    headlineBefore: "Explore",
-    headlineHighlight: "Fresh",
-    headlineAfter: "Daily Groceries",
-    cta: "Shop Now",
+    id: "worldcup-2026",
+    promo: "2026 FIFA World Cup",
+    headlineBefore: "Official",
+    headlineHighlight: "World Cup",
+    headlineAfter: "Jerseys",
+    cta: "Shop Jerseys",
     href: "/shop",
-    image:
-      "https://images.unsplash.com/photo-1542838132-92c53300491e?w=900&h=720&fit=crop&q=80",
+    image: "/banners/worldcup-2026-official-jerseys.png",
   },
   {
-    id: "2",
-    promo: "Limited Time Deals",
-    headlineBefore: "Discover",
-    headlineHighlight: "Top",
-    headlineAfter: "Fashion Deals",
-    cta: "View Deals",
+    id: "worldcup-fan-made",
+    promo: "Premium Collection",
+    headlineBefore: "Fan Made",
+    headlineHighlight: "World Cup",
+    headlineAfter: "Jerseys",
+    cta: "Explore Collection",
     href: "/shop?deals=true",
-    image:
-      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=900&h=720&fit=crop&q=80",
-  },
-  {
-    id: "3",
-    promo: "Free Delivery",
-    headlineBefore: "Shop",
-    headlineHighlight: "Smart",
-    headlineAfter: "Online Today",
-    cta: "Explore Now",
-    href: "/shop?featured=true",
-    image:
-      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=900&h=720&fit=crop&q=80",
+    image: "/banners/worldcup-fan-made-jerseys.png",
   },
 ];
 
@@ -87,29 +74,6 @@ const textItem = {
     transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
-
-const HERO_LIQUID_CLIP = "url(#hero-liquid-blob)";
-
-/**
- * Organic blob clip traced from the reference pebble/kidney shape:
- * wider right bulge, softer left taper, slight dip along the bottom edge.
- */
-function HeroLiquidBlobDefs() {
-  return (
-    <svg
-      aria-hidden
-      width="0"
-      height="0"
-      className="pointer-events-none absolute"
-    >
-      <defs>
-        <clipPath id="hero-liquid-blob" clipPathUnits="objectBoundingBox">
-          <path d="M 0.17 0.28 C 0.27 0.11 0.49 0.06 0.71 0.1 C 0.9 0.14 0.98 0.32 0.96 0.51 C 0.94 0.71 0.85 0.87 0.64 0.92 C 0.52 0.95 0.42 0.86 0.34 0.88 C 0.21 0.91 0.07 0.8 0.07 0.57 C 0.07 0.35 0.1 0.3 0.17 0.28 Z" />
-        </clipPath>
-      </defs>
-    </svg>
-  );
-}
 
 function HeadlineSquiggle({ className }: { className?: string }) {
   return (
@@ -197,7 +161,6 @@ export function HeroCarousel({
 
   return (
     <section className={cn("bg-background", className)}>
-      <HeroLiquidBlobDefs />
       <div className="container-custom py-6 sm:py-8 lg:py-14">
         <motion.div
           className="relative grid min-h-0 cursor-grab touch-pan-y items-center gap-6 active:cursor-grabbing sm:min-h-[340px] sm:gap-8 lg:grid-cols-2 lg:gap-10 lg:min-h-[380px] xl:min-h-[440px]"
@@ -276,24 +239,20 @@ export function HeroCarousel({
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
           >
-            <div className="relative aspect-[1000/720] w-full">
+            <div className="relative aspect-[16/10] w-full sm:aspect-[16/9]">
               <div
                 aria-hidden
-                className="absolute inset-0 scale-[1.045] bg-gradient-to-br from-secondary/70 via-primary/15 to-muted/50"
-                style={{ clipPath: HERO_LIQUID_CLIP }}
+                className="absolute inset-0 scale-[1.02] rounded-2xl bg-gradient-to-br from-secondary/70 via-primary/15 to-muted/50"
               />
-              <div
-                className="relative h-full w-full drop-shadow-md"
-                style={{ clipPath: HERO_LIQUID_CLIP }}
-              >
+              <div className="relative h-full w-full overflow-hidden rounded-2xl border border-border/40 bg-muted/20 shadow-lg">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeSlide.id}
-                    initial={{ opacity: 0, scale: 1.05 }}
+                    initial={{ opacity: 0, scale: 1.03 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.98 }}
                     transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 bg-muted/30"
+                    className="absolute inset-0"
                   >
                     <Image
                       src={activeSlide.image}
@@ -303,7 +262,7 @@ export function HeroCarousel({
                       sizes="(max-width: 1024px) 100vw, 50vw"
                       className="object-cover object-center"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/14 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/10" />
                   </motion.div>
                 </AnimatePresence>
               </div>

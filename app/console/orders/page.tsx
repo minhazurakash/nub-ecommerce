@@ -2,8 +2,10 @@ import Link from "next/link";
 import { requireAdmin } from "@/modules/auth/actions";
 import { getAllOrders } from "@/modules/orders/queries";
 import { ConsoleHeader } from "@/components/console/console-header";
-import { OrderStatusBadge } from "@/components/account/order-status-badge";
+import { OrderStatusSelect } from "@/components/console/order-status-select";
 import { formatPrice } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -35,13 +37,14 @@ export default async function ConsoleOrdersPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead className="text-right">Total</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {orders.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={7}
                     className="h-24 text-center text-muted-foreground"
                   >
                     No orders found.
@@ -65,7 +68,10 @@ export default async function ConsoleOrdersPage() {
                       {order.items.length}
                     </TableCell>
                     <TableCell>
-                      <OrderStatusBadge status={order.status} />
+                      <OrderStatusSelect
+                        orderId={order.id}
+                        currentStatus={order.status}
+                      />
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(order.placedAt).toLocaleDateString("en-US", {
@@ -76,6 +82,14 @@ export default async function ConsoleOrdersPage() {
                     </TableCell>
                     <TableCell className="text-right font-medium">
                       {formatPrice(order.total)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="outline" size="sm" asChild>
+                        <Link href={`/console/orders/${order.id}`}>
+                          <Eye className="h-4 w-4" />
+                          View
+                        </Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

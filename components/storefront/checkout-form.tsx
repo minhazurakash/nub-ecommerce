@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CreditCard, Loader2, MapPin, User } from "lucide-react";
+import { CreditCard, Loader2, MapPin, Tag, User, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,13 +27,13 @@ import {
   selectCartTotal,
 } from "@/modules/cart/cartSlice";
 import { createOrder } from "@/modules/orders/actions";
+import { validateCoupon } from "@/modules/coupons/actions";
 import { shippingAddressSchema } from "@/lib/validations/checkout";
 import { cn, formatPrice } from "@/lib/utils";
+import {
+  calculateOrderTotals,
+} from "@/lib/pricing";
 import type { Address } from "@/lib/types/database";
-
-const SHIPPING_FLAT_RATE = 9.99;
-const TAX_RATE = 0.08;
-const FREE_SHIPPING_THRESHOLD = 75;
 
 const contactSchema = z.object({
   email: z.string().email("Valid email is required"),
@@ -124,10 +124,16 @@ export function CheckoutForm({
   const [step, setStep] = useState(1);
   const [useNewAddress, setUseNewAddress] = useState(savedAddresses.length === 0);
   const [processing, setProcessing] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discount: number;
+  } | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT_RATE;
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + shipping + tax;
+  const discount = appliedCoupon?.discount ?? 0;
+  const totals = calculateOrderTotals(subtotal, discount);
+  const { shipping, tax, total } = totals;
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -195,6 +201,34 @@ export function CheckoutForm({
     if (valid) setStep((s) => Math.min(3, s + 1));
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    setCouponLoading(true);
+    try {
+      const result = await validateCoupon(couponInput, subtotal);
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      setAppliedCoupon({
+        code: result.data.code,
+        discount: result.data.discount,
+      });
+      toast.success("Coupon applied!");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+  };
+
   const onSubmit = async (values: CheckoutFormValues) => {
     setProcessing(true);
     try {
@@ -216,6 +250,7 @@ export function CheckoutForm({
           : undefined,
         saveAddress: values.saveAddress,
         notes: values.notes,
+        couponCode: appliedCoupon?.code,
       });
 
       if (!result.success) {
@@ -596,11 +631,56 @@ export function CheckoutForm({
                   </span>
                 </div>
               ))}
+              <div className="space-y-2">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-primary" />
+                      <span className="font-medium">{appliedCoupon.code}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label="Remove coupon"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      placeholder="Coupon code"
+                      className="uppercase"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading}
+                    >
+                      {couponLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Apply"
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </div>
               <Separator />
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
+              {discount > 0 ? (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount ({appliedCoupon?.code})</span>
+                  <span>-{formatPrice(discount)}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Shipping</span>
                 <span>

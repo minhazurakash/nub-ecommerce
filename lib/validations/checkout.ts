@@ -22,6 +22,7 @@ export const checkoutFormSchema = z
     address: addressSchema.optional(),
     saveAddress: z.boolean().optional().default(false),
     notes: z.string().max(500).optional(),
+    couponCode: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.addressId) return;
