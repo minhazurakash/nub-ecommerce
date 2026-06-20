@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   Heart,
-  Home,
   LayoutDashboard,
   LogIn,
   LogOut,
   ShoppingBag,
-  Store,
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,12 +25,11 @@ import { Role } from "@/lib/types/database";
 import { setMobileNavOpen } from "@/modules/ui/uiSlice";
 import { selectWishlistCount } from "@/modules/wishlist/wishlistSlice";
 import { ThemeToggle } from "./theme-toggle";
+import {
+  isStorefrontNavActive,
+  storefrontNavLinks,
+} from "@/lib/storefront-nav";
 import { cn } from "@/lib/utils";
-
-const navLinks = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/shop", label: "Shop", icon: Store },
-];
 
 export function MobileNav({
   isLoggedIn = false,
@@ -42,6 +39,8 @@ export function MobileNav({
   userRole?: Role | null;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.ui.mobileNavOpen);
   const wishlistCount = useAppSelector(selectWishlistCount);
@@ -62,12 +61,9 @@ export function MobileNav({
         </SheetHeader>
 
         <nav className="mt-6 flex flex-col gap-1">
-          {navLinks.map((link) => {
+          {storefrontNavLinks.map((link) => {
             const Icon = link.icon;
-            const isActive =
-              link.href === "/"
-                ? pathname === "/"
-                : pathname === "/shop" || pathname.startsWith("/shop");
+            const isActive = isStorefrontNavActive(link.href, pathname, search);
             return (
               <Link
                 key={link.href}

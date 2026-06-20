@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Heart, LogOut, Menu, Search, ShoppingBag, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,12 +19,11 @@ import { signOut } from "@/modules/auth/actions";
 import { getDashboardLabel, getDashboardPath } from "@/lib/auth";
 import { Role } from "@/lib/types/database";
 import { ThemeToggle } from "./theme-toggle";
+import {
+  isStorefrontNavActive,
+  storefrontNavLinks,
+} from "@/lib/storefront-nav";
 import { cn } from "@/lib/utils";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/shop", label: "Shop" },
-];
 
 function CountBadge({ count }: { count: number }) {
   if (count <= 0) return null;
@@ -43,6 +42,8 @@ export function Header({
   userRole?: Role | null;
 }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
   const dispatch = useAppDispatch();
   const cartCount = useAppSelector(selectCartCount);
   const wishlistCount = useAppSelector(selectWishlistCount);
@@ -69,12 +70,9 @@ export function Header({
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center lg:flex">
-            <ul className="flex items-center gap-10">
-              {navLinks.map((link) => {
-                const active =
-                  link.href === "/"
-                    ? pathname === "/"
-                    : pathname === "/shop" || pathname.startsWith("/shop");
+            <ul className="flex items-center gap-8 xl:gap-10">
+              {storefrontNavLinks.map((link) => {
+                const active = isStorefrontNavActive(link.href, pathname, search);
 
                 return (
                   <li key={link.href}>

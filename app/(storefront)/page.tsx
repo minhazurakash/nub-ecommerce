@@ -5,15 +5,25 @@ import { CategoryStrip } from "@/components/storefront/category-strip";
 import { SectionHeader } from "@/components/storefront/section-header";
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { NewsletterSection } from "@/components/storefront/newsletter-section";
+import { DiscountCampaignModal } from "@/components/storefront/discount-campaign-modal";
 import { toProductCardData } from "@/lib/product-mapper";
 import { getFeaturedProducts, getDealProducts } from "@/modules/products/queries";
 import { getTopLevelCategories } from "@/modules/categories/queries";
 import { getBrands } from "@/modules/brands/queries";
+import { getActiveCoupons } from "@/modules/coupons/queries";
+import type { Coupon } from "@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SaleCountdown } from "@/components/storefront/sale-countdown";
 
 export default async function HomePage() {
+  let activeCoupons: Coupon[] = [];
+  try {
+    activeCoupons = await getActiveCoupons();
+  } catch {
+    activeCoupons = [];
+  }
+
   const [featured, deals, categories, brands] = await Promise.all([
     getFeaturedProducts(8),
     getDealProducts(8),
@@ -21,8 +31,18 @@ export default async function HomePage() {
     getBrands(),
   ]);
 
+  const campaigns = activeCoupons.map((coupon) => ({
+    id: coupon.id,
+    code: coupon.code,
+    discountType: coupon.discountType as string,
+    amount: coupon.amount,
+    validUntil: coupon.validUntil,
+    minOrderAmount: coupon.minOrderAmount,
+  }));
+
   return (
     <>
+      <DiscountCampaignModal campaigns={campaigns} />
       <HeroCarousel />
 
       <section className="container-custom py-10 sm:py-12 lg:py-16">
@@ -32,7 +52,10 @@ export default async function HomePage() {
           href="/shop?featured=true"
         />
         <div className="mt-6 sm:mt-8">
-          <ProductGrid products={featured.map(toProductCardData)} />
+          <ProductGrid
+            products={featured.map(toProductCardData)}
+            cardVariant="buyNow"
+          />
         </div>
       </section>
 
@@ -76,7 +99,10 @@ export default async function HomePage() {
           href="/shop?sort=popular"
         />
         <div className="mt-6 sm:mt-8">
-          <ProductGrid products={deals.map(toProductCardData)} />
+          <ProductGrid
+            products={deals.map(toProductCardData)}
+            cardVariant="buyNow"
+          />
         </div>
       </section>
 

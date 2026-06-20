@@ -48,19 +48,22 @@ const cartSlice = createSlice({
     hydrateCart(state) {
       state.items = loadCart();
     },
-    addToCart(state, action: PayloadAction<CartItem>) {
+    addToCart(
+      state,
+      action: PayloadAction<CartItem & { openDrawer?: boolean }>
+    ) {
+      const { openDrawer = true, ...item } = action.payload;
       const existing = state.items.find(
         (i) =>
-          i.productId === action.payload.productId &&
-          i.variantId === action.payload.variantId
+          i.productId === item.productId && i.variantId === item.variantId
       );
       if (existing) {
-        existing.quantity += action.payload.quantity;
+        existing.quantity += item.quantity;
       } else {
-        state.items.push(action.payload);
+        state.items.push(item);
       }
       saveCart(state.items);
-      state.isOpen = true;
+      state.isOpen = openDrawer;
     },
     removeFromCart(
       state,

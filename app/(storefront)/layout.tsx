@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 
+import { Suspense } from "react";
 import { TopBar } from "@/components/storefront/top-bar";
 import { Header } from "@/components/storefront/header";
 import { Footer } from "@/components/storefront/footer";
@@ -19,12 +20,16 @@ export default async function StorefrontLayout({
   return (
     <div className="flex min-h-screen flex-col">
       <TopBar />
-      <Header isLoggedIn={!!user} userRole={user?.role} />
+      <Suspense fallback={<div className="h-16 border-b lg:h-[4.75rem]" />}>
+        <Header isLoggedIn={!!user} userRole={user?.role} />
+      </Suspense>
       <main className="flex-1">{children}</main>
       <Footer />
       <CartDrawer />
       <SearchCommand />
-      <MobileNav isLoggedIn={!!user} userRole={user?.role} />
+      <Suspense>
+        <MobileNav isLoggedIn={!!user} userRole={user?.role} />
+      </Suspense>
       <ProductQuickView />
     </div>
   );

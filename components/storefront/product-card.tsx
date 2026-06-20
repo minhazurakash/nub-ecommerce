@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, Heart, ShoppingBag, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, Heart, ShoppingBag, Star, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,8 @@ export interface ProductCardData {
 interface ProductCardProps {
   product: ProductCardData;
   className?: string;
+  /** `default` — hover actions + add to cart. `buyNow` — visible Buy Now → checkout. */
+  variant?: "default" | "buyNow";
 }
 
 function StarRating({ rating = 0 }: { rating?: number }) {
@@ -49,7 +52,12 @@ function StarRating({ rating = 0 }: { rating?: number }) {
   );
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({
+  product,
+  className,
+  variant = "default",
+}: ProductCardProps) {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const inWishlist = useAppSelector(selectIsInWishlist(product.id));
 
@@ -60,21 +68,28 @@ export function ProductCard({ product, className }: ProductCardProps) {
     ? Math.round((1 - product.discountPrice! / product.price) * 100)
     : 0;
 
+  const cartPayload = {
+    productId: product.id,
+    title: product.title,
+    slug: product.slug,
+    image: product.image,
+    price: product.price,
+    discountPrice: product.discountPrice,
+    quantity: 1,
+  };
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    dispatch(
-      addToCart({
-        productId: product.id,
-        title: product.title,
-        slug: product.slug,
-        image: product.image,
-        price: product.price,
-        discountPrice: product.discountPrice,
-        quantity: 1,
-      })
-    );
+    dispatch(addToCart(cartPayload));
     toast.success("Added to cart");
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dispatch(addToCart({ ...cartPayload, openDrawer: false }));
+    router.push("/checkout");
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
@@ -156,10 +171,14 @@ export function ProductCard({ product, className }: ProductCardProps) {
               size="icon"
               variant="secondary"
               className="h-9 min-h-9 w-9 min-w-9 flex-1 sm:h-9 sm:w-9 sm:min-w-9 sm:flex-none"
-              onClick={handleAddToCart}
-              aria-label="Add to cart"
+              onClick={variant === "buyNow" ? handleBuyNow : handleAddToCart}
+              aria-label={variant === "buyNow" ? "Buy now" : "Add to cart"}
             >
-              <ShoppingBag className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              {variant === "buyNow" ? (
+                <Zap className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              ) : (
+                <ShoppingBag className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
+              )}
             </Button>
             <Button
               type="button"
@@ -182,32 +201,42 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
       </div>
 
-      <Link
-        href={`/product/${product.slug}`}
-        className="flex flex-1 flex-col gap-2 p-4"
-      >
-        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground transition-colors duration-200 group-hover:text-primary">
-          {product.title}
-        </h3>
-        <div className="flex items-center gap-2">
-          <StarRating rating={product.rating} />
-          {product.reviewCount != null && product.reviewCount > 0 && (
-            <span className="text-xs text-muted-foreground">
-              ({product.reviewCount})
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <Link href={`/product/${product.slug}`} className="flex flex-col gap-2">
+          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-foreground transition-colors duration-200 group-hover:text-primary">
+            {product.title}
+          </h3>
+          <div className="flex items-center gap-2">
+            <StarRating rating={product.rating} />
+            {product.reviewCount != null && product.reviewCount > 0 && (
+              <span className="text-xs text-muted-foreground">
+                ({product.reviewCount})
+              </span>
+            )}
+          </div>
+          <div className="mt-auto flex items-center gap-2">
+            <span className="text-base font-semibold text-primary">
+              {formatPrice(displayPrice)}
             </span>
-          )}
-        </div>
-        <div className="mt-auto flex items-center gap-2">
-          <span className="text-base font-semibold text-primary">
-            {formatPrice(displayPrice)}
-          </span>
-          {hasDiscount && (
-            <span className="text-sm text-muted-foreground line-through">
-              {formatPrice(product.price)}
-            </span>
-          )}
-        </div>
-      </Link>
+            {hasDiscount && (
+              <span className="text-sm text-muted-foreground line-through">
+                {formatPrice(product.price)}
+              </span>
+            )}
+          </div>
+        </Link>
+        {variant === "buyNow" && (
+          <Button
+            type="button"
+            size="sm"
+            className="w-full gap-1.5"
+            onClick={handleBuyNow}
+          >
+            <Zap className="h-3.5 w-3.5" />
+            Buy Now
+          </Button>
+        )}
+      </div>
     </article>
   );
 }

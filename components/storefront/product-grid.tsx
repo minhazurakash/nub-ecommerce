@@ -9,6 +9,7 @@ interface ProductGridProps {
   loading?: boolean;
   skeletonCount?: number;
   className?: string;
+  cardVariant?: "default" | "buyNow";
 }
 
 function ProductCardSkeleton() {
@@ -27,6 +28,7 @@ export function ProductGrid({
   loading = false,
   skeletonCount = 8,
   className,
+  cardVariant = "default",
 }: ProductGridProps) {
   if (loading) {
     return (
@@ -59,7 +61,11 @@ export function ProductGrid({
       )}
     >
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        <ProductCard
+          key={product.id}
+          product={product}
+          variant={cardVariant}
+        />
       ))}
     </div>
   );
