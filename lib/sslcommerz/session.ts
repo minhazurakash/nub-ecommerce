@@ -16,6 +16,7 @@ export type SslCommerzSessionInput = {
   totalAmount: number;
   customer: SslCommerzCustomer;
   productName: string;
+  appUrl: string;
 };
 
 export type SslCommerzSessionResult =
@@ -29,7 +30,7 @@ export type SslCommerzSessionResult =
 export async function createSslCommerzSession(
   input: SslCommerzSessionInput
 ): Promise<SslCommerzSessionResult> {
-  const config = getSslCommerzConfig();
+  const config = getSslCommerzConfig(input.appUrl);
   const amount = input.totalAmount.toFixed(2);
   const oid = encodeURIComponent(input.orderId);
   const bridge = `${config.appUrl}/api/payments/sslcommerz/bridge`;
@@ -118,23 +119,4 @@ export async function validateSslCommerzPayment(
   }
 
   return data;
-}
-
-export function readOrderIdFromCallback(
-  params: URLSearchParams,
-  fallbackOrderId?: string | null
-): string | null {
-  return (
-    params.get("oid") ||
-    params.get("value_a") ||
-    params.get("Value_A") ||
-    params.get("tran_id") ||
-    fallbackOrderId ||
-    null
-  );
-}
-
-export function isPaymentStatusValid(status: string | null): boolean {
-  const normalized = (status ?? "").toUpperCase();
-  return !normalized || normalized === "VALID" || normalized === "VALIDATED";
 }

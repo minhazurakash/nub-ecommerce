@@ -16,7 +16,7 @@ import { PENDING_ORDER_SESSION_KEY } from "@/lib/sslcommerz/config";
 import {
   isPaymentStatusValid,
   readOrderIdFromCallback,
-} from "@/lib/sslcommerz/session";
+} from "@/lib/sslcommerz/callback-utils";
 import {
   cancelSslCommerzOrder,
   confirmSslCommerzPayment,

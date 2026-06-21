@@ -1,3 +1,5 @@
+import { getAppUrlFromEnv } from "@/lib/app-url-env";
+
 /** Survives redirect if the gateway omits value_a; cleared after payment result. */
 export const PENDING_ORDER_SESSION_KEY = "blueberry_pending_order";
 
@@ -15,9 +17,9 @@ export const SSLCOMMERZ_SANDBOX_DEFAULTS = {
   storePassword: "qwerty",
 } as const;
 
-export function getSslCommerzConfig(): SslCommerzConfig {
+export function getSslCommerzConfig(appUrl?: string): SslCommerzConfig {
   const isLive = process.env.SSLCOMMERZ_USE_LIVE === "true";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const resolvedAppUrl = appUrl ?? getAppUrlFromEnv();
 
   const storeId =
     process.env.SSLCOMMERZ_STORE_ID ?? SSLCOMMERZ_SANDBOX_DEFAULTS.storeId;
@@ -34,7 +36,7 @@ export function getSslCommerzConfig(): SslCommerzConfig {
     validationUrl: isLive
       ? "https://securepay.sslcommerz.com/validator/api/validationserverAPI.php"
       : "https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php",
-    appUrl,
+    appUrl: resolvedAppUrl,
   };
 }
 

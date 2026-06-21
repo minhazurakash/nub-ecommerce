@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { confirmSslCommerzPayment } from "@/modules/orders/payment";
-import { readOrderIdFromCallback } from "@/lib/sslcommerz/session";
+import { readOrderIdFromCallback } from "@/lib/sslcommerz/callback-utils";
 
 /** Legacy direct callback — redirects through payment result flow. */
 export async function GET(request: NextRequest) {

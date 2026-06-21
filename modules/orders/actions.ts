@@ -19,6 +19,7 @@ import {
   type CheckoutFormInput,
 } from "@/lib/validations/checkout";
 import { calculateOrderTotals } from "@/lib/pricing";
+import { resolveAppUrl } from "@/lib/app-url";
 import { createSslCommerzSession } from "@/lib/sslcommerz/session";
 import { requireUser } from "@/modules/auth/actions";
 import { toAddressInsert } from "@/lib/supabase/mappers";
@@ -251,9 +252,11 @@ export async function createOrder(
     let gatewayUrl: string | undefined;
 
     if (!isCod) {
+      const appUrl = await resolveAppUrl();
       const pay = await createSslCommerzSession({
         orderId: order.id,
         totalAmount: totals.total,
+        appUrl,
         customer: {
           name: shippingAddress.fullName,
           email: user.email,
