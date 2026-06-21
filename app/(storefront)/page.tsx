@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { HeroCarousel } from "@/components/storefront/hero-carousel";
@@ -7,6 +9,8 @@ import { ProductGrid } from "@/components/storefront/product-grid";
 import { NewsletterSection } from "@/components/storefront/newsletter-section";
 import { DiscountCampaignModal } from "@/components/storefront/discount-campaign-modal";
 import { toProductCardData } from "@/lib/product-mapper";
+import { bannerToHeroSlide } from "@/lib/banner-utils";
+import { getActiveBanners } from "@/modules/banners/queries";
 import { getFeaturedProducts, getDealProducts } from "@/modules/products/queries";
 import { getTopLevelCategories } from "@/modules/categories/queries";
 import { getBrands } from "@/modules/brands/queries";
@@ -24,6 +28,8 @@ export default async function HomePage() {
     activeCoupons = [];
   }
 
+  const banners = await getActiveBanners();
+
   const [featured, deals, categories, brands] = await Promise.all([
     getFeaturedProducts(8),
     getDealProducts(8),
@@ -40,10 +46,20 @@ export default async function HomePage() {
     minOrderAmount: coupon.minOrderAmount,
   }));
 
+  const heroSlides = banners.map(bannerToHeroSlide);
+
   return (
     <>
       <DiscountCampaignModal campaigns={campaigns} />
-      <HeroCarousel />
+      <HeroCarousel
+        key={heroSlides
+          .map(
+            (slide) =>
+              `${slide.id}:${slide.headlineBefore}:${slide.headlineHighlight}:${slide.headlineAfter}:${slide.promo}`
+          )
+          .join("|")}
+        slides={heroSlides}
+      />
 
       <section className="container-custom py-10 sm:py-12 lg:py-16">
         <SectionHeader

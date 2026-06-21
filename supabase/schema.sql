@@ -6,12 +6,22 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
-  CREATE TYPE order_status AS ENUM ('PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED');
+  CREATE TYPE order_status AS ENUM ('PENDING', 'AWAITING_PAYMENT', 'SHIPPED', 'DELIVERED', 'CANCELLED');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
   CREATE TYPE discount_type AS ENUM ('PERCENTAGE', 'FLAT');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_method AS ENUM ('COD', 'SSLCOMMERZ');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_status AS ENUM ('PENDING', 'PAID', 'FAILED', 'REFUNDED');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -139,6 +149,23 @@ CREATE TABLE IF NOT EXISTS coupons (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS banners (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  title TEXT NOT NULL,
+  headline_before TEXT NOT NULL DEFAULT '',
+  headline_highlight TEXT NOT NULL DEFAULT '',
+  headline_after TEXT NOT NULL DEFAULT '',
+  cta_text TEXT NOT NULL DEFAULT 'Shop Now',
+  href TEXT NOT NULL DEFAULT '/shop',
+  image_url TEXT NOT NULL,
+  sort_order INT NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  starts_at TIMESTAMPTZ,
+  ends_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   user_id TEXT NOT NULL REFERENCES users(id),
@@ -152,6 +179,10 @@ CREATE TABLE IF NOT EXISTS orders (
   coupon_id TEXT REFERENCES coupons(id) ON DELETE SET NULL,
   coupon_code TEXT,
   shipping_address JSONB NOT NULL,
+  payment_method payment_method NOT NULL DEFAULT 'COD',
+  payment_status payment_status NOT NULL DEFAULT 'PENDING',
+  payment_transaction_id TEXT,
+  notes TEXT,
   placed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -192,6 +223,7 @@ CREATE INDEX IF NOT EXISTS idx_products_deal ON products(is_deal);
 CREATE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code);
 CREATE INDEX IF NOT EXISTS idx_coupons_active ON coupons(is_active);
 CREATE INDEX IF NOT EXISTS idx_orders_user ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_banners_active_sort ON banners(is_active, sort_order);
 CREATE INDEX IF NOT EXISTS idx_orders_coupon ON orders(coupon_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
@@ -221,6 +253,9 @@ CREATE TRIGGER addresses_updated_at BEFORE UPDATE ON addresses FOR EACH ROW EXEC
 
 DROP TRIGGER IF EXISTS coupons_updated_at ON coupons;
 CREATE TRIGGER coupons_updated_at BEFORE UPDATE ON coupons FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS banners_updated_at ON banners;
+CREATE TRIGGER banners_updated_at BEFORE UPDATE ON banners FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 DROP TRIGGER IF EXISTS orders_updated_at ON orders;
 CREATE TRIGGER orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at();

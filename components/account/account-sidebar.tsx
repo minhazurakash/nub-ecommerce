@@ -18,7 +18,7 @@ export function AccountSidebar({ className }: AccountSidebarProps) {
 
   return (
     <>
-      <div className={cn("md:hidden", className)}>
+      <div className={cn("-mx-4 md:hidden", className)}>
         <AccountMobileNav />
       </div>
 

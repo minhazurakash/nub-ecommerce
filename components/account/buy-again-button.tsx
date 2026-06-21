@@ -3,6 +3,7 @@
 import { ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useAppDispatch } from "@/lib/store/hooks";
 import { addToCart, setCartOpen } from "@/modules/cart/cartSlice";
 
@@ -21,9 +22,10 @@ type BuyAgainItem = {
 type BuyAgainButtonProps = {
   items: BuyAgainItem[];
   disabled?: boolean;
+  className?: string;
 };
 
-export function BuyAgainButton({ items, disabled }: BuyAgainButtonProps) {
+export function BuyAgainButton({ items, disabled, className }: BuyAgainButtonProps) {
   const dispatch = useAppDispatch();
 
   function handleBuyAgain() {
@@ -57,7 +59,11 @@ export function BuyAgainButton({ items, disabled }: BuyAgainButtonProps) {
   }
 
   return (
-    <Button onClick={handleBuyAgain} disabled={disabled || items.length === 0}>
+    <Button
+      onClick={handleBuyAgain}
+      disabled={disabled || items.length === 0}
+      className={cn("w-full sm:w-auto", className)}
+    >
       <ShoppingBag className="h-4 w-4" />
       Buy again
     </Button>

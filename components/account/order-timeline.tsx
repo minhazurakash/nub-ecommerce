@@ -41,6 +41,7 @@ function getStepState(
 
   const statusIndex: Record<OrderStatus, number> = {
     PENDING: 0,
+    AWAITING_PAYMENT: 0,
     SHIPPED: 1,
     DELIVERED: 2,
     CANCELLED: 0,

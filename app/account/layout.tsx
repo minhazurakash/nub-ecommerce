@@ -25,9 +25,9 @@ export default async function AccountLayout({
     <div className="flex min-h-screen flex-col">
       <TopBar />
       <Header isLoggedIn userRole={user.role} />
-      <main className="flex-1">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col gap-8 md:flex-row">
+      <main className="flex-1 overflow-x-hidden">
+        <div className="container-custom py-4 sm:py-8">
+          <div className="flex flex-col gap-4 md:gap-8 md:flex-row">
             <AccountSidebar />
             <div className="min-w-0 flex-1">{children}</div>
           </div>

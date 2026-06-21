@@ -55,8 +55,14 @@ export function MobileNav({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="left" className="w-full max-w-xs">
         <SheetHeader>
-          <SheetTitle className="brand-wordmark text-left text-xl">
-            Blueberry
+          <SheetTitle asChild>
+            <Link
+              href="/"
+              onClick={close}
+              className="brand-wordmark text-left text-xl"
+            >
+              Blueberry
+            </Link>
           </SheetTitle>
         </SheetHeader>
 

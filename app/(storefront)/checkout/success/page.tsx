@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2, Package } from "lucide-react";
+import { ClearCartOnSuccess } from "@/components/storefront/clear-cart-on-success";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +21,7 @@ export default async function CheckoutSuccessPage({
 
   return (
     <div className="container-custom py-16">
+      <ClearCartOnSuccess />
       <Card className="mx-auto max-w-lg text-center">
         <CardHeader className="items-center space-y-4">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">

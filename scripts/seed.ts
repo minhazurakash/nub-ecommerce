@@ -9,6 +9,7 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "crypto";
 import { setupDatabase } from "./setup-db";
 import { ensureProductImagesBucket } from "../lib/supabase/storage";
+import { defaultBannerRowsForDb } from "../lib/banner-seed-data";
 
 // Load .env.local then .env (same order as Next.js)
 config({ path: resolve(process.cwd(), ".env") });
@@ -87,7 +88,7 @@ async function clearAll() {
   const tables = [
     "order_items", "orders", "cart_items", "wishlist_items", "reviews",
     "product_tags", "product_variants", "product_images", "products",
-    "tags", "addresses", "users", "categories", "brands",
+    "tags", "addresses", "users", "categories", "brands", "banners",
   ];
   for (const table of tables) {
     await db.from(table).delete().neq("id", "00000000-0000-0000-0000-000000000000");
@@ -152,6 +153,13 @@ async function main() {
   }
   const allCatIds = Object.values(categoryIds);
   console.log(`Created ${allCatIds.length} categories`);
+
+  const { data: banners, error: bannersError } = await db
+    .from("banners")
+    .insert(defaultBannerRowsForDb())
+    .select();
+  checkError(bannersError, "insert banners");
+  console.log(`Created ${banners?.length ?? 0} banners`);
 
   // Products
   const productRows = [];

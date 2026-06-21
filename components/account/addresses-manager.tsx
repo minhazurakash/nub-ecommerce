@@ -84,24 +84,24 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
   }
 
   return (
-    <>
-      <div className="flex items-center justify-between gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="font-[family-name:var(--font-poppins)] text-2xl font-semibold tracking-tight">
+          <h1 className="font-[family-name:var(--font-poppins)] text-xl font-semibold tracking-tight sm:text-2xl">
             Addresses
           </h1>
           <p className="text-sm text-muted-foreground">
             Manage your shipping addresses
           </p>
         </div>
-        <Button onClick={openCreate} disabled={isPending}>
+        <Button onClick={openCreate} disabled={isPending} className="w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           Add address
         </Button>
       </div>
 
       {addresses.length === 0 ? (
-        <div className="mt-8 rounded-lg border border-dashed p-12 text-center">
+        <div className="mt-8 rounded-lg border border-dashed p-8 text-center sm:p-12">
           <p className="text-muted-foreground">No saved addresses yet.</p>
           <Button variant="outline" className="mt-4" onClick={openCreate}>
             Add your first address
@@ -156,6 +156,6 @@ export function AddressesManager({ addresses }: AddressesManagerProps) {
           />
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

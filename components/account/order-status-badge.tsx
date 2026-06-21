@@ -7,6 +7,7 @@ const statusConfig: Record<
   { label: string; variant: NonNullable<BadgeProps["variant"]> }
 > = {
   PENDING: { label: "Pending", variant: "warning" },
+  AWAITING_PAYMENT: { label: "Awaiting Payment", variant: "secondary" },
   SHIPPED: { label: "Shipped", variant: "default" },
   DELIVERED: { label: "Delivered", variant: "success" },
   CANCELLED: { label: "Cancelled", variant: "destructive" },

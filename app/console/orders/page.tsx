@@ -3,7 +3,9 @@ import { requireAdmin } from "@/modules/auth/actions";
 import { getAllOrders } from "@/modules/orders/queries";
 import { ConsoleHeader } from "@/components/console/console-header";
 import { OrderStatusSelect } from "@/components/console/order-status-select";
+import { PaymentStatusBadge } from "@/components/account/payment-status-badge";
 import { formatPrice } from "@/lib/utils";
+import { paymentMethodLabel } from "@/lib/payment-labels";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import {
@@ -35,6 +37,7 @@ export default async function ConsoleOrdersPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Payment</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead className="text-right">Total</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -44,7 +47,7 @@ export default async function ConsoleOrdersPage() {
               {orders.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="h-24 text-center text-muted-foreground"
                   >
                     No orders found.
@@ -72,6 +75,17 @@ export default async function ConsoleOrdersPage() {
                         orderId={order.id}
                         currentStatus={order.status}
                       />
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          {paymentMethodLabel(order.paymentMethod)}
+                        </p>
+                        <PaymentStatusBadge
+                          status={order.paymentStatus}
+                          paymentMethod={order.paymentMethod}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(order.placedAt).toLocaleDateString("en-US", {

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CreditCard, Loader2, MapPin, Tag, User, X } from "lucide-react";
+import { CreditCard, Loader2, MapPin, Tag, Truck, User, Wallet, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,8 @@ import {
 import { createOrder } from "@/modules/orders/actions";
 import { validateCoupon } from "@/modules/coupons/actions";
 import { shippingAddressSchema } from "@/lib/validations/checkout";
+import { PaymentMethod } from "@/lib/types/database";
+import { PENDING_ORDER_SESSION_KEY } from "@/lib/sslcommerz/config";
 import { cn, formatPrice } from "@/lib/utils";
 import {
   calculateOrderTotals,
@@ -42,16 +44,7 @@ const contactSchema = z.object({
 });
 
 const paymentSchema = z.object({
-  cardName: z.string().min(1, "Name on card is required"),
-  cardNumber: z
-    .string()
-    .min(16, "Card number must be 16 digits")
-    .max(19)
-    .regex(/^[\d\s]+$/, "Invalid card number"),
-  expiry: z
-    .string()
-    .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Use MM/YY format"),
-  cvv: z.string().min(3, "CVV is required").max(4),
+  paymentMethod: z.nativeEnum(PaymentMethod),
 });
 
 const checkoutSchema = z
@@ -95,6 +88,7 @@ interface CheckoutFormProps {
   savedAddresses?: Address[];
   userEmail?: string;
   userName?: string | null;
+  paymentError?: string | null;
 }
 
 const emptyAddress = {
@@ -112,6 +106,7 @@ export function CheckoutForm({
   savedAddresses = [],
   userEmail = "",
   userName = "",
+  paymentError = null,
 }: CheckoutFormProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -146,7 +141,7 @@ export function CheckoutForm({
       addressId: defaultAddressId,
       address: savedAddresses.length > 0 ? undefined : emptyAddress,
       saveAddress: false,
-      payment: { cardName: "", cardNumber: "", expiry: "", cvv: "" },
+      payment: { paymentMethod: PaymentMethod.COD },
       notes: "",
     },
   });
@@ -162,6 +157,7 @@ export function CheckoutForm({
 
   const saveAddress = watch("saveAddress");
   const addressId = watch("addressId");
+  const paymentMethod = watch("payment.paymentMethod");
 
   if (cartItems.length === 0) {
     return (
@@ -230,10 +226,10 @@ export function CheckoutForm({
   };
 
   const onSubmit = async (values: CheckoutFormValues) => {
+    if (step !== 3) return;
+
     setProcessing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
       const result = await createOrder({
         items: cartItems.map((item) => ({
           productId: item.productId,
@@ -251,10 +247,17 @@ export function CheckoutForm({
         saveAddress: values.saveAddress,
         notes: values.notes,
         couponCode: appliedCoupon?.code,
+        paymentMethod: values.payment.paymentMethod,
       });
 
       if (!result.success) {
         toast.error(result.error);
+        return;
+      }
+
+      if (result.data.gatewayUrl) {
+        sessionStorage.setItem(PENDING_ORDER_SESSION_KEY, result.data.orderId);
+        window.location.href = result.data.gatewayUrl;
         return;
       }
 
@@ -270,8 +273,26 @@ export function CheckoutForm({
     }
   };
 
+  const handlePlaceOrder = handleSubmit(onSubmit);
+
+  const handleFormKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
+    if (event.key !== "Enter") return;
+    const target = event.target as HTMLElement;
+    if (target.tagName === "TEXTAREA") return;
+    event.preventDefault();
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form
+      onSubmit={(event) => event.preventDefault()}
+      onKeyDown={handleFormKeyDown}
+      className="space-y-8"
+    >
+      {paymentError ? (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {paymentError}
+        </div>
+      ) : null}
       <div className="flex items-center justify-between">
         {STEPS.map((s, index) => {
           const Icon = s.icon;
@@ -508,73 +529,66 @@ export function CheckoutForm({
           {step === 3 && (
             <Card>
               <CardHeader>
-                <CardTitle>Payment</CardTitle>
+                <CardTitle>Payment Method</CardTitle>
                 <CardDescription>
-                  Demo payment — no real charges will be made
+                  Choose how you would like to pay for your order
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-lg border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
-                  Use any 16-digit card number, future expiry (MM/YY), and any
-                  3-digit CVV to complete this demo checkout.
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cardName">Name on card</Label>
-                  <Input
-                    id="cardName"
-                    {...register("payment.cardName")}
-                    placeholder="Jane Doe"
-                  />
-                  {errors.payment?.cardName && (
-                    <p className="text-sm text-destructive">
-                      {errors.payment.cardName.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cardNumber">Card number</Label>
-                  <Input
-                    id="cardNumber"
-                    {...register("payment.cardNumber")}
-                    placeholder="4242 4242 4242 4242"
-                    maxLength={19}
-                  />
-                  {errors.payment?.cardNumber && (
-                    <p className="text-sm text-destructive">
-                      {errors.payment.cardNumber.message}
-                    </p>
-                  )}
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiry">Expiry (MM/YY)</Label>
-                    <Input
-                      id="expiry"
-                      {...register("payment.expiry")}
-                      placeholder="12/28"
-                      maxLength={5}
-                    />
-                    {errors.payment?.expiry && (
-                      <p className="text-sm text-destructive">
-                        {errors.payment.expiry.message}
-                      </p>
+                <div className="grid gap-3">
+                  <label
+                    className={cn(
+                      "flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
+                      paymentMethod === PaymentMethod.COD
+                        ? "border-primary bg-primary/5"
+                        : "hover:bg-muted/50"
                     )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cvv">CVV</Label>
-                    <Input
-                      id="cvv"
-                      {...register("payment.cvv")}
-                      placeholder="123"
-                      maxLength={4}
+                  >
+                    <input
+                      type="radio"
+                      value={PaymentMethod.COD}
+                      className="mt-1"
+                      {...register("payment.paymentMethod")}
                     />
-                    {errors.payment?.cvv && (
-                      <p className="text-sm text-destructive">
-                        {errors.payment.cvv.message}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 font-medium">
+                        <Truck className="h-4 w-4 text-primary" />
+                        Cash on Delivery
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Pay with cash when your order is delivered.
                       </p>
+                    </div>
+                  </label>
+
+                  <label
+                    className={cn(
+                      "flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors",
+                      paymentMethod === PaymentMethod.SSLCOMMERZ
+                        ? "border-primary bg-primary/5"
+                        : "hover:bg-muted/50"
                     )}
-                  </div>
+                  >
+                    <input
+                      type="radio"
+                      value={PaymentMethod.SSLCOMMERZ}
+                      className="mt-1"
+                      {...register("payment.paymentMethod")}
+                    />
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2 font-medium">
+                        <Wallet className="h-4 w-4 text-primary" />
+                        Pay Online (SSLCommerz)
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        bKash, Nagad, cards &amp; mobile banking. Sandbox uses
+                        testbox credentials — complete payment on the SSLCommerz
+                        page.
+                      </p>
+                    </div>
+                  </label>
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="notes">Order notes (optional)</Label>
                   <Textarea
@@ -602,9 +616,15 @@ export function CheckoutForm({
                 Continue
               </Button>
             ) : (
-              <Button type="submit" disabled={processing}>
+              <Button
+                type="button"
+                disabled={processing}
+                onClick={handlePlaceOrder}
+              >
                 {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Place Order · {formatPrice(total)}
+                {paymentMethod === PaymentMethod.SSLCOMMERZ
+                  ? `Pay Online · ${formatPrice(total)}`
+                  : `Place Order · ${formatPrice(total)}`}
               </Button>
             )}
           </div>
@@ -652,6 +672,12 @@ export function CheckoutForm({
                     <Input
                       value={couponInput}
                       onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void handleApplyCoupon();
+                        }
+                      }}
                       placeholder="Coupon code"
                       className="uppercase"
                     />

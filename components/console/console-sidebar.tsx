@@ -10,6 +10,7 @@ import {
   Users,
   Grape,
   Tag,
+  Image,
 } from "lucide-react";
 import { Role } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const adminNavItems = [
   { href: "/console/categories", label: "Categories", icon: FolderTree },
   { href: "/console/orders", label: "Orders", icon: ShoppingCart },
   { href: "/console/coupons", label: "Discounts", icon: Tag },
+  { href: "/console/banners", label: "Banners", icon: Image },
   { href: "/console/users", label: "Users", icon: Users },
 ] as const;
 
@@ -44,14 +46,19 @@ export function ConsoleSidebar({ role, className }: ConsoleSidebarProps) {
         className
       )}
     >
-      <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Grape className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold leading-none">Blueberry</p>
-          <p className="text-xs text-muted-foreground">Admin Console</p>
-        </div>
+      <div className="flex h-16 items-center border-b border-border px-6">
+        <Link
+          href="/"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg transition-opacity hover:opacity-80"
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Grape className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold leading-none">Blueberry</p>
+            <p className="text-xs text-muted-foreground">Admin Console</p>
+          </div>
+        </Link>
       </div>
 
       <nav className="flex-1 space-y-1 p-4">

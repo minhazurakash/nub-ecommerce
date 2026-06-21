@@ -66,7 +66,7 @@ export function ProfileForm({
       onSubmit={handleSubmit(onSubmit)}
       className={cn("space-y-6", className)}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
         <Avatar className="h-20 w-20">
           {avatarUrl ? <AvatarImage src={avatarUrl} alt={name || "Avatar"} /> : null}
           <AvatarFallback className="text-lg">{initials}</AvatarFallback>

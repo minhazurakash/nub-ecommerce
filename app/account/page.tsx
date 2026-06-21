@@ -33,9 +33,9 @@ export default async function AccountDashboardPage() {
   const recentOrders = allOrders.slice(0, 5);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h1 className="font-[family-name:var(--font-poppins)] text-2xl font-semibold tracking-tight">
+        <h1 className="font-[family-name:var(--font-poppins)] text-xl font-semibold tracking-tight sm:text-2xl">
           Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -74,12 +74,12 @@ export default async function AccountDashboardPage() {
       )}
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+        <CardHeader className="flex flex-col gap-4 space-y-0 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="text-lg">Recent orders</CardTitle>
             <CardDescription>Your latest purchases</CardDescription>
           </div>
-          <Button variant="outline" size="sm" asChild>
+          <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
             <Link href="/account/orders">View all</Link>
           </Button>
         </CardHeader>
@@ -101,6 +101,8 @@ export default async function AccountDashboardPage() {
                   id: order.id,
                   orderNumber: order.orderNumber,
                   status: order.status,
+                  paymentStatus: order.paymentStatus,
+                  paymentMethod: order.paymentMethod,
                   placedAt: order.placedAt,
                   total: Number(order.total),
                   itemCount: order.items.length,

@@ -6,9 +6,22 @@ export enum Role {
 
 export enum OrderStatus {
   PENDING = "PENDING",
+  AWAITING_PAYMENT = "AWAITING_PAYMENT",
   SHIPPED = "SHIPPED",
   DELIVERED = "DELIVERED",
   CANCELLED = "CANCELLED",
+}
+
+export enum PaymentMethod {
+  COD = "COD",
+  SSLCOMMERZ = "SSLCOMMERZ",
+}
+
+export enum PaymentStatus {
+  PENDING = "PENDING",
+  PAID = "PAID",
+  FAILED = "FAILED",
+  REFUNDED = "REFUNDED",
 }
 
 export enum DiscountType {
@@ -134,6 +147,23 @@ export type Coupon = {
   updatedAt: string;
 };
 
+export type Banner = {
+  id: string;
+  title: string;
+  headlineBefore: string;
+  headlineHighlight: string;
+  headlineAfter: string;
+  ctaText: string;
+  href: string;
+  imageUrl: string;
+  sortOrder: number;
+  isActive: boolean;
+  startsAt: string | null;
+  endsAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type Order = {
   id: string;
   userId: string;
@@ -147,6 +177,10 @@ export type Order = {
   couponId: string | null;
   couponCode: string | null;
   shippingAddress: Record<string, string>;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  paymentTransactionId: string | null;
+  notes: string | null;
   placedAt: string;
   updatedAt: string;
 };

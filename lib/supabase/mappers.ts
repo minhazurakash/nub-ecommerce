@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   Address,
+  Banner,
   Brand,
   Category,
   Coupon,
@@ -8,6 +9,8 @@ import type {
   Order,
   OrderItem,
   OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
   Product,
   ProductImage,
   ProductVariant,
@@ -151,6 +154,25 @@ export function mapCoupon(row: any): Coupon {
   };
 }
 
+export function mapBanner(row: any): Banner {
+  return {
+    id: row.id,
+    title: row.title,
+    headlineBefore: row.headline_before ?? "",
+    headlineHighlight: row.headline_highlight ?? "",
+    headlineAfter: row.headline_after ?? "",
+    ctaText: row.cta_text ?? "Shop Now",
+    href: row.href ?? "/shop",
+    imageUrl: row.image_url,
+    sortOrder: row.sort_order ?? 0,
+    isActive: bool(row.is_active),
+    startsAt: row.starts_at ?? null,
+    endsAt: row.ends_at ?? null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
 export function mapOrder(row: any): Order {
   return {
     id: row.id,
@@ -165,6 +187,10 @@ export function mapOrder(row: any): Order {
     couponId: row.coupon_id ?? null,
     couponCode: row.coupon_code ?? null,
     shippingAddress: row.shipping_address as Record<string, string>,
+    paymentMethod: (row.payment_method ?? "COD") as PaymentMethod,
+    paymentStatus: (row.payment_status ?? "PENDING") as PaymentStatus,
+    paymentTransactionId: row.payment_transaction_id ?? null,
+    notes: row.notes ?? null,
     placedAt: row.placed_at,
     updatedAt: row.updated_at,
   };

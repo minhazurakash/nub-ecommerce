@@ -5,7 +5,9 @@ import { requireAdmin } from "@/modules/auth/actions";
 import { getOrderById } from "@/modules/orders/queries";
 import { ConsoleHeader } from "@/components/console/console-header";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
+import { PaymentStatusBadge } from "@/components/account/payment-status-badge";
 import { formatPrice } from "@/lib/utils";
+import { paymentMethodLabel } from "@/lib/payment-labels";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -51,7 +53,13 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         </Button>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <OrderStatusBadge status={order.status} />
+          <div className="flex flex-wrap items-center gap-2">
+            <OrderStatusBadge status={order.status} />
+            <PaymentStatusBadge
+              status={order.paymentStatus}
+              paymentMethod={order.paymentMethod}
+            />
+          </div>
           <OrderStatusForm orderId={order.id} currentStatus={order.status} />
         </div>
 
@@ -119,6 +127,35 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                   {shippingAddress.postalCode}
                 </p>
                 <p>{shippingAddress.country}</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Payment</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Method</span>
+                  <span className="font-medium">
+                    {paymentMethodLabel(order.paymentMethod)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted-foreground">Status</span>
+                  <PaymentStatusBadge
+                    status={order.paymentStatus}
+                    paymentMethod={order.paymentMethod}
+                  />
+                </div>
+                {order.paymentTransactionId ? (
+                  <div className="space-y-1 border-t border-border pt-3">
+                    <span className="text-muted-foreground">Transaction ID</span>
+                    <p className="break-all font-mono text-xs">
+                      {order.paymentTransactionId}
+                    </p>
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
 

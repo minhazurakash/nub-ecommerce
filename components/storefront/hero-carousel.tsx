@@ -12,40 +12,7 @@ import {
 } from "framer-motion";
 import { Truck, Shield, RotateCcw } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
-
-export interface HeroSlide {
-  id: string;
-  promo: string;
-  headlineBefore: string;
-  headlineHighlight: string;
-  headlineAfter: string;
-  cta: string;
-  href: string;
-  image: string;
-}
-
-const defaultSlides: HeroSlide[] = [
-  {
-    id: "worldcup-2026",
-    promo: "2026 FIFA World Cup",
-    headlineBefore: "Official",
-    headlineHighlight: "World Cup",
-    headlineAfter: "Jerseys",
-    cta: "Shop Jerseys",
-    href: "/shop",
-    image: "/banners/worldcup-2026-official-jerseys.png",
-  },
-  {
-    id: "worldcup-fan-made",
-    promo: "Premium Collection",
-    headlineBefore: "Fan Made",
-    headlineHighlight: "World Cup",
-    headlineAfter: "Jerseys",
-    cta: "Explore Collection",
-    href: "/shop?deals=true",
-    image: "/banners/worldcup-fan-made-jerseys.png",
-  },
-];
+import type { HeroSlide } from "@/lib/banner-utils";
 
 const trustItems = [
   { icon: Truck, label: `Free delivery over ${formatPrice(75)}` },
@@ -101,14 +68,11 @@ function HeadlineSquiggle({ className }: { className?: string }) {
 }
 
 interface HeroCarouselProps {
-  slides?: HeroSlide[];
+  slides: HeroSlide[];
   className?: string;
 }
 
-export function HeroCarousel({
-  slides = defaultSlides,
-  className,
-}: HeroCarouselProps) {
+export function HeroCarousel({ slides, className }: HeroCarouselProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const dragX = useMotionValue(0);
@@ -158,6 +122,10 @@ export function HeroCarousel({
   }, [isPaused, slides.length]);
 
   const activeSlide = slides[selectedIndex] ?? slides[0];
+
+  if (slides.length === 0 || !activeSlide) {
+    return null;
+  }
 
   return (
     <section className={cn("bg-background", className)}>

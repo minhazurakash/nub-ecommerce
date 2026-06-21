@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { BuyAgainButton } from "@/components/account/buy-again-button";
 import { OrderItemsTable } from "@/components/account/order-items-table";
 import { OrderStatusBadge } from "@/components/account/order-status-badge";
+import { PaymentStatusBadge } from "@/components/account/payment-status-badge";
 import { OrderTimeline } from "@/components/account/order-timeline";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/utils";
+import { paymentMethodLabel } from "@/lib/payment-labels";
 import { getCurrentUser } from "@/modules/auth/actions";
 import { getOrderById } from "@/modules/orders/queries";
 
@@ -74,20 +76,24 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-1">
           <Button variant="ghost" size="sm" className="-ml-2" asChild>
             <Link href="/account/orders">
               <ArrowLeft className="h-4 w-4" />
               Back to orders
             </Link>
           </Button>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-[family-name:var(--font-poppins)] text-2xl font-semibold tracking-tight">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <h1 className="break-all font-[family-name:var(--font-poppins)] text-xl font-semibold tracking-tight sm:break-normal sm:text-2xl">
               {order.orderNumber}
             </h1>
             <OrderStatusBadge status={order.status} />
+            <PaymentStatusBadge
+              status={order.paymentStatus}
+              paymentMethod={order.paymentMethod}
+            />
           </div>
           <p className="text-sm text-muted-foreground">
             Placed {format(order.placedAt, "MMMM d, yyyy 'at' h:mm a")}
@@ -109,7 +115,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
                 {order.items.length === 1 ? "item" : "items"} in this order
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               <OrderItemsTable
                 items={order.items.map((item) => ({
                   id: item.id,
@@ -166,9 +172,30 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         <div className="space-y-6">
           <Card>
             <CardHeader>
+              <CardTitle className="text-lg">Payment</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-muted-foreground">Method</span>
+                <span className="font-medium sm:text-right">
+                  {paymentMethodLabel(order.paymentMethod)}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <PaymentStatusBadge
+                  status={order.paymentStatus}
+                  paymentMethod={order.paymentMethod}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle className="text-lg">Delivery status</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               <OrderTimeline status={order.status} />
             </CardContent>
           </Card>

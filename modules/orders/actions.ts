@@ -8,23 +8,25 @@ import {
   mapProductImage,
   mapProductVariant,
 } from "@/lib/supabase/mappers";
-import type { ProductVariant } from "@/lib/types/database";
+import {
+  OrderStatus,
+  PaymentMethod,
+  PaymentStatus,
+  type ProductVariant,
+} from "@/lib/types/database";
 import {
   checkoutFormSchema,
   type CheckoutFormInput,
 } from "@/lib/validations/checkout";
-import {
-  calculateOrderTotals,
-} from "@/lib/pricing";
+import { calculateOrderTotals } from "@/lib/pricing";
+import { createSslCommerzSession } from "@/lib/sslcommerz/session";
 import { requireUser } from "@/modules/auth/actions";
 import { toAddressInsert } from "@/lib/supabase/mappers";
 import {
   incrementCouponUsage,
   resolveCouponForOrder,
 } from "@/modules/coupons/actions";
-
-const SHIPPING_FLAT_RATE = 9.99;
-const TAX_RATE = 0.08;
+import { decrementStockForOrderItems } from "@/modules/orders/stock";
 
 type ActionResult<T = void> =
   | { success: true; data: T }
@@ -42,7 +44,13 @@ function getEffectivePrice(price: number, discountPrice: number | null): number 
 
 export async function createOrder(
   input: CheckoutFormInput
-): Promise<ActionResult<{ orderId: string; orderNumber: string }>> {
+): Promise<
+  ActionResult<{
+    orderId: string;
+    orderNumber: string;
+    gatewayUrl?: string;
+  }>
+> {
   const user = await requireUser();
 
   const parsed = checkoutFormSchema.safeParse(input);
@@ -53,7 +61,16 @@ export async function createOrder(
     };
   }
 
-  const { items, addressId, address, saveAddress, couponCode } = parsed.data;
+  const {
+    items,
+    addressId,
+    address,
+    saveAddress,
+    couponCode,
+    notes,
+    paymentMethod,
+  } = parsed.data;
+
   const db = getDb();
 
   try {
@@ -162,18 +179,8 @@ export async function createOrder(
           colorHex: variant.colorHex,
           sku: variant.sku,
         };
-        await db
-          .from("product_variants")
-          .update({ stock: variant.stock - item.quantity })
-          .eq("id", variant.id);
-      } else {
-        if (product.stock < item.quantity) {
-          throw new Error(`Insufficient stock for ${product.title}`);
-        }
-        await db
-          .from("products")
-          .update({ stock: product.stock - item.quantity })
-          .eq("id", product.id);
+      } else if (product.stock < item.quantity) {
+        throw new Error(`Insufficient stock for ${product.title}`);
       }
 
       subtotal += unitPrice * item.quantity;
@@ -193,12 +200,14 @@ export async function createOrder(
     );
     const totals = calculateOrderTotals(subtotal, discount);
     const orderNumber = generateOrderNumber();
+    const isCod = paymentMethod === PaymentMethod.COD;
 
     const { data: order, error: orderError } = await db
       .from("orders")
       .insert({
         user_id: user.id,
         order_number: orderNumber,
+        status: isCod ? OrderStatus.PENDING : OrderStatus.AWAITING_PAYMENT,
         subtotal: totals.subtotal,
         discount: totals.discount,
         shipping: totals.shipping,
@@ -207,18 +216,26 @@ export async function createOrder(
         coupon_id: coupon?.id ?? null,
         coupon_code: coupon?.code ?? null,
         shipping_address: shippingAddress,
+        payment_method: paymentMethod,
+        payment_status: PaymentStatus.PENDING,
+        notes: notes ?? null,
       })
       .select("id, order_number")
       .single();
 
-    if (orderError || !order) throw new Error(orderError?.message ?? "Order failed");
+    if (orderError || !order) {
+      throw new Error(orderError?.message ?? "Order failed");
+    }
 
     await db.from("order_items").insert(
       orderItems.map((item) => ({ ...item, order_id: order.id }))
     );
 
-    if (coupon) {
-      await incrementCouponUsage(coupon.id);
+    if (isCod) {
+      await decrementStockForOrderItems(orderItems);
+      if (coupon) {
+        await incrementCouponUsage(coupon.id);
+      }
     }
 
     await db
@@ -231,9 +248,43 @@ export async function createOrder(
     revalidatePath("/account/orders");
     revalidatePath("/cart");
 
+    let gatewayUrl: string | undefined;
+
+    if (!isCod) {
+      const pay = await createSslCommerzSession({
+        orderId: order.id,
+        totalAmount: totals.total,
+        customer: {
+          name: shippingAddress.fullName,
+          email: user.email,
+          phone: shippingAddress.phone,
+          address: shippingAddress.line1,
+          city: shippingAddress.city,
+          state: shippingAddress.state,
+          postcode: shippingAddress.postalCode,
+          country: shippingAddress.country || "Bangladesh",
+        },
+        productName: orderItems.map((i) => i.product_title).join(", "),
+      });
+
+      if (!pay.ok) {
+        await db
+          .from("orders")
+          .update({ status: OrderStatus.CANCELLED })
+          .eq("id", order.id);
+        throw new Error(pay.message);
+      }
+
+      gatewayUrl = pay.gatewayPageUrl;
+    }
+
     return {
       success: true,
-      data: { orderId: order.id, orderNumber: order.order_number },
+      data: {
+        orderId: order.id,
+        orderNumber: order.order_number,
+        gatewayUrl,
+      },
     };
   } catch (error) {
     const message =

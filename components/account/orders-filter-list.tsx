@@ -11,6 +11,7 @@ type FilterTab = "all" | OrderStatus;
 const FILTER_TABS: { value: FilterTab; label: string }[] = [
   { value: "all", label: "All" },
   { value: OrderStatus.PENDING, label: "Pending" },
+  { value: OrderStatus.AWAITING_PAYMENT, label: "Awaiting Payment" },
   { value: OrderStatus.SHIPPED, label: "Shipped" },
   { value: OrderStatus.DELIVERED, label: "Delivered" },
   { value: OrderStatus.CANCELLED, label: "Cancelled" },
@@ -29,9 +30,9 @@ export function OrdersFilterList({ orders }: OrdersFilterListProps) {
   }, [orders, filter]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="font-[family-name:var(--font-poppins)] text-2xl font-semibold tracking-tight">
+        <h1 className="font-[family-name:var(--font-poppins)] text-xl font-semibold tracking-tight sm:text-2xl">
           Orders
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -40,17 +41,19 @@ export function OrdersFilterList({ orders }: OrdersFilterListProps) {
       </div>
 
       <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterTab)}>
-        <TabsList className="h-auto flex-wrap justify-start">
-          {FILTER_TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="-mx-1 overflow-x-auto pb-1">
+          <TabsList className="inline-flex h-auto w-max min-w-full flex-nowrap justify-start gap-1 p-1 sm:min-w-0 sm:flex-wrap">
+            {FILTER_TABS.map((tab) => (
+              <TabsTrigger key={tab.value} value={tab.value} className="shrink-0">
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
       </Tabs>
 
       {filteredOrders.length === 0 ? (
-        <div className="rounded-lg border border-dashed p-12 text-center">
+        <div className="rounded-lg border border-dashed p-8 text-center sm:p-12">
           <p className="text-muted-foreground">
             {filter === "all"
               ? "You haven't placed any orders yet."
@@ -66,6 +69,8 @@ export function OrdersFilterList({ orders }: OrdersFilterListProps) {
                 id: order.id,
                 orderNumber: order.orderNumber,
                 status: order.status,
+                paymentStatus: order.paymentStatus,
+                paymentMethod: order.paymentMethod,
                 placedAt: order.placedAt,
                 total: Number(order.total),
                 itemCount: order.items.length,

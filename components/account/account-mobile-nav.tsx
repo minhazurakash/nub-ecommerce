@@ -49,7 +49,7 @@ export function AccountMobileNav({
     <nav
       aria-label="Account navigation"
       className={cn(
-        "flex gap-1 overflow-x-auto border-b pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        "flex gap-1 overflow-x-auto border-b px-4 pb-px [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
         className
       )}
     >

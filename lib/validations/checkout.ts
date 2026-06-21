@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PaymentMethod } from "@/lib/types/database";
 import { addressSchema } from "@/lib/validations/product";
 
 /** Shipping fields only — fullName/phone come from the contact step */
@@ -23,6 +24,9 @@ export const checkoutFormSchema = z
     saveAddress: z.boolean().optional().default(false),
     notes: z.string().max(500).optional(),
     couponCode: z.string().optional(),
+    paymentMethod: z
+      .nativeEnum(PaymentMethod)
+      .default(PaymentMethod.COD),
   })
   .superRefine((data, ctx) => {
     if (data.addressId) return;

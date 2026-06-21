@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: OrderStatus.PENDING, label: "Pending" },
+  { value: OrderStatus.AWAITING_PAYMENT, label: "Awaiting Payment" },
   { value: OrderStatus.SHIPPED, label: "Shipped" },
   { value: OrderStatus.DELIVERED, label: "Delivered" },
   { value: OrderStatus.CANCELLED, label: "Cancelled" },

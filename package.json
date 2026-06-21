@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "db:seed": "tsx scripts/seed.ts",
+    "db:seed-banners": "tsx scripts/seed-banners.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:setup-storage": "tsx scripts/setup-storage.ts"
   },
