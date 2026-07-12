@@ -25,6 +25,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE notification_type AS ENUM ('ORDER_PLACED', 'ORDER_STATUS');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   auth_id TEXT UNIQUE NOT NULL,
@@ -114,7 +119,8 @@ CREATE TABLE IF NOT EXISTS reviews (
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   rating INT NOT NULL,
   comment TEXT NOT NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (product_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS addresses (
@@ -217,6 +223,18 @@ CREATE TABLE IF NOT EXISTS cart_items (
   UNIQUE (user_id, product_id, variant_id)
 );
 
+CREATE TABLE IF NOT EXISTS notifications (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type notification_type NOT NULL,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  link TEXT NOT NULL,
+  order_id TEXT REFERENCES orders(id) ON DELETE SET NULL,
+  is_read BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_featured ON products(is_featured);
 CREATE INDEX IF NOT EXISTS idx_products_deal ON products(is_deal);
@@ -227,6 +245,9 @@ CREATE INDEX IF NOT EXISTS idx_banners_active_sort ON banners(is_active, sort_or
 CREATE INDEX IF NOT EXISTS idx_orders_coupon ON orders(coupon_id);
 CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses(user_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_read_created
+  ON notifications(user_id, is_read, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_order ON notifications(order_id);
 
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$

@@ -6,6 +6,8 @@ import type {
   Category,
   Coupon,
   DiscountType,
+  Notification,
+  NotificationType,
   Order,
   OrderItem,
   OrderStatus,
@@ -206,6 +208,20 @@ export function mapOrderItem(row: any): OrderItem {
     productTitle: row.product_title,
     productImage: row.product_image ?? null,
     variantSnapshot: row.variant_snapshot ?? null,
+  };
+}
+
+export function mapNotification(row: any): Notification {
+  return {
+    id: row.id,
+    userId: row.user_id,
+    type: row.type as NotificationType,
+    title: row.title,
+    body: row.body,
+    link: row.link,
+    orderId: row.order_id ?? null,
+    isRead: Boolean(row.is_read),
+    createdAt: row.created_at,
   };
 }
 

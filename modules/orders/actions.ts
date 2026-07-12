@@ -28,6 +28,7 @@ import {
   resolveCouponForOrder,
 } from "@/modules/coupons/actions";
 import { decrementStockForOrderItems } from "@/modules/orders/stock";
+import { notifyAdminsOfNewOrder } from "@/modules/notifications/create";
 
 type ActionResult<T = void> =
   | { success: true; data: T }
@@ -237,6 +238,10 @@ export async function createOrder(
       if (coupon) {
         await incrementCouponUsage(coupon.id);
       }
+      await notifyAdminsOfNewOrder({
+        id: order.id,
+        orderNumber: order.order_number,
+      });
     }
 
     await db
@@ -248,6 +253,9 @@ export async function createOrder(
     revalidatePath("/account");
     revalidatePath("/account/orders");
     revalidatePath("/cart");
+    revalidatePath("/console");
+    revalidatePath("/console/orders");
+    revalidatePath("/console/notifications");
 
     let gatewayUrl: string | undefined;
 

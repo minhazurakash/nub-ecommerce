@@ -7,6 +7,7 @@ import {
   MapPin,
   Package,
   User,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,6 +22,7 @@ export type AccountNavItem = {
 export const ACCOUNT_NAV_ITEMS: AccountNavItem[] = [
   { href: "/account", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/account/orders", label: "Orders", icon: Package },
+  { href: "/account/notifications", label: "Notifications", icon: Bell },
   { href: "/account/profile", label: "Profile", icon: User },
   { href: "/account/addresses", label: "Addresses", icon: MapPin },
 ];

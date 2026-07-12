@@ -29,6 +29,11 @@ export enum DiscountType {
   FLAT = "FLAT",
 }
 
+export enum NotificationType {
+  ORDER_PLACED = "ORDER_PLACED",
+  ORDER_STATUS = "ORDER_STATUS",
+}
+
 export type User = {
   id: string;
   authId: string;
@@ -194,4 +199,16 @@ export type OrderItem = {
   productTitle: string;
   productImage: string | null;
   variantSnapshot: Record<string, unknown> | null;
+};
+
+export type Notification = {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  link: string;
+  orderId: string | null;
+  isRead: boolean;
+  createdAt: string;
 };

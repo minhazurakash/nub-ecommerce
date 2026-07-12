@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductGrid } from "@/components/storefront/product-grid";
 import { type ProductCardData } from "@/components/storefront/product-card";
+import { ReviewForm } from "@/components/storefront/review-form";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { addToCart } from "@/modules/cart/cartSlice";
 import {
@@ -55,6 +56,11 @@ interface ProductDetailClientProps {
   reviews: ProductReview[];
   relatedProducts: ProductCardData[];
   section?: "purchase" | "details" | "all";
+  reviewEligibility?: {
+    isLoggedIn: boolean;
+    hasPurchased: boolean;
+    hasExistingReview: boolean;
+  };
 }
 
 function isHtmlDescription(text: string) {
@@ -108,6 +114,7 @@ export function ProductDetailClient({
   reviews,
   relatedProducts,
   section = "all",
+  reviewEligibility,
 }: ProductDetailClientProps) {
   const dispatch = useAppDispatch();
   const inWishlist = useAppSelector(selectIsInWishlist(product.id));
@@ -359,7 +366,16 @@ export function ProductDetailClient({
         <TabsContent value="description" className="mt-4">
           <ProductDescription description={product.description} />
         </TabsContent>
-        <TabsContent value="reviews" className="mt-4">
+        <TabsContent value="reviews" className="mt-4 space-y-6">
+          {reviewEligibility ? (
+            <ReviewForm
+              productId={product.id}
+              isLoggedIn={reviewEligibility.isLoggedIn}
+              hasPurchased={reviewEligibility.hasPurchased}
+              hasExistingReview={reviewEligibility.hasExistingReview}
+            />
+          ) : null}
+
           {reviews.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No reviews yet. Be the first to review this product!

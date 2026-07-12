@@ -2,7 +2,15 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Heart, LogOut, Menu, Search, ShoppingBag, User } from "lucide-react";
+import {
+  Bell,
+  Heart,
+  LogOut,
+  Menu,
+  Search,
+  ShoppingBag,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -37,9 +45,11 @@ function CountBadge({ count }: { count: number }) {
 export function Header({
   isLoggedIn = false,
   userRole,
+  unreadCount = 0,
 }: {
   isLoggedIn?: boolean;
   userRole?: Role | null;
+  unreadCount?: number;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -66,13 +76,17 @@ export function Header({
             href="/"
             className="shrink-0 text-xl font-bold tracking-tight lg:text-2xl"
           >
-          <span className="brand-wordmark">Blueberry</span>
+            <span className="brand-wordmark">Blueberry</span>
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center lg:flex">
             <ul className="flex items-center gap-8 xl:gap-10">
               {storefrontNavLinks.map((link) => {
-                const active = isStorefrontNavActive(link.href, pathname, search);
+                const active = isStorefrontNavActive(
+                  link.href,
+                  pathname,
+                  search
+                );
 
                 return (
                   <li key={link.href}>
@@ -137,6 +151,9 @@ export function Header({
                           {getDashboardLabel(userRole)}
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/account/notifications">Notifications</Link>
+                      </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer text-destructive focus:text-destructive"
@@ -153,6 +170,25 @@ export function Header({
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+
+              {isLoggedIn ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative h-9 w-9 rounded-full"
+                  asChild
+                  aria-label={
+                    unreadCount > 0
+                      ? `${unreadCount} unread notifications`
+                      : "Notifications"
+                  }
+                >
+                  <Link href="/account/notifications">
+                    <Bell className="h-4 w-4" />
+                    <CountBadge count={unreadCount} />
+                  </Link>
+                </Button>
+              ) : null}
 
               <Button
                 variant="ghost"
@@ -182,6 +218,25 @@ export function Header({
             </div>
 
             <div className="flex items-center gap-0.5 sm:hidden">
+              {isLoggedIn ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative"
+                  asChild
+                  aria-label={
+                    unreadCount > 0
+                      ? `${unreadCount} unread notifications`
+                      : "Notifications"
+                  }
+                >
+                  <Link href="/account/notifications">
+                    <Bell className="h-5 w-5" />
+                    <CountBadge count={unreadCount} />
+                  </Link>
+                </Button>
+              ) : null}
+
               <Button
                 variant="ghost"
                 size="icon"

@@ -6,6 +6,10 @@ import {
   PaymentStatus,
 } from "@/lib/types/database";
 import { incrementCouponUsage } from "@/modules/coupons/actions";
+import {
+  notifyAdminsOfNewOrder,
+  notifyCustomerOrderCancelled,
+} from "@/modules/notifications/create";
 import { decrementStockForOrder } from "@/modules/orders/stock";
 import { validateSslCommerzPayment } from "@/lib/sslcommerz/session";
 
@@ -47,6 +51,16 @@ export async function confirmSslCommerzPayment(
         status: OrderStatus.CANCELLED,
       })
       .eq("id", tranId);
+
+    if (order.status !== OrderStatus.CANCELLED) {
+      await notifyCustomerOrderCancelled({
+        userId: order.userId,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        previousStatus: order.status,
+      });
+    }
+
     return { success: false, error: "Payment validation failed" };
   }
 
@@ -65,6 +79,11 @@ export async function confirmSslCommerzPayment(
     await incrementCouponUsage(order.couponId);
   }
 
+  await notifyAdminsOfNewOrder({
+    id: order.id,
+    orderNumber: order.orderNumber,
+  });
+
   return { success: true, orderNumber: order.orderNumber };
 }
 
@@ -72,13 +91,15 @@ export async function cancelSslCommerzOrder(tranId: string) {
   const db = getDb();
   const { data: orderRow } = await db
     .from("orders")
-    .select("payment_status, payment_method")
+    .select("*")
     .eq("id", tranId)
     .maybeSingle();
 
   if (!orderRow) return;
-  if (orderRow.payment_method !== PaymentMethod.SSLCOMMERZ) return;
-  if (orderRow.payment_status === PaymentStatus.PAID) return;
+  const order = mapOrder(orderRow);
+  if (order.paymentMethod !== PaymentMethod.SSLCOMMERZ) return;
+  if (order.paymentStatus === PaymentStatus.PAID) return;
+  if (order.status === OrderStatus.CANCELLED) return;
 
   await db
     .from("orders")
@@ -87,4 +108,11 @@ export async function cancelSslCommerzOrder(tranId: string) {
       status: OrderStatus.CANCELLED,
     })
     .eq("id", tranId);
+
+  await notifyCustomerOrderCancelled({
+    userId: order.userId,
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    previousStatus: order.status,
+  });
 }

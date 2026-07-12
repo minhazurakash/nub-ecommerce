@@ -11,6 +11,8 @@ import {
   Grape,
   Tag,
   Image,
+  Bell,
+  Star,
 } from "lucide-react";
 import { Role } from "@/lib/types/database";
 import { cn } from "@/lib/utils";
@@ -20,6 +22,8 @@ const adminNavItems = [
   { href: "/console/products", label: "Products", icon: Package },
   { href: "/console/categories", label: "Categories", icon: FolderTree },
   { href: "/console/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/console/reviews", label: "Reviews", icon: Star },
+  { href: "/console/notifications", label: "Notifications", icon: Bell },
   { href: "/console/coupons", label: "Discounts", icon: Tag },
   { href: "/console/banners", label: "Banners", icon: Image },
   { href: "/console/users", label: "Users", icon: Users },
@@ -32,10 +36,15 @@ const editorNavItems = [
 
 type ConsoleSidebarProps = {
   role: Role;
+  unreadCount?: number;
   className?: string;
 };
 
-export function ConsoleSidebar({ role, className }: ConsoleSidebarProps) {
+export function ConsoleSidebar({
+  role,
+  unreadCount = 0,
+  className,
+}: ConsoleSidebarProps) {
   const pathname = usePathname();
   const navItems = role === Role.ADMIN ? adminNavItems : editorNavItems;
 
@@ -68,6 +77,8 @@ export function ConsoleSidebar({ role, className }: ConsoleSidebarProps) {
               ? pathname === item.href
               : pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
+          const showBadge =
+            item.href === "/console/notifications" && unreadCount > 0;
 
           return (
             <Link
@@ -81,7 +92,12 @@ export function ConsoleSidebar({ role, className }: ConsoleSidebarProps) {
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {showBadge ? (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              ) : null}
             </Link>
           );
         })}

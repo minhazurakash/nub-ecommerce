@@ -12,6 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationBell } from "@/components/notifications/notification-bell";
+import { useNotificationCount } from "@/components/notifications/notification-count-context";
 import { signOut } from "@/modules/auth/actions";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,9 @@ type ConsoleHeaderProps = {
     email?: string;
     avatarUrl?: string | null;
   };
+  /** @deprecated Prefer layout NotificationCountProvider */
+  unreadCount?: number;
+  showNotifications?: boolean;
   className?: string;
 };
 
@@ -42,9 +47,16 @@ export function ConsoleHeader({
   title,
   description,
   user,
+  unreadCount: unreadCountProp,
+  showNotifications = true,
   className,
 }: ConsoleHeaderProps) {
   const { theme, setTheme } = useTheme();
+  const { count: contextCount, enabled: notificationsEnabled } =
+    useNotificationCount();
+  const unreadCount = unreadCountProp ?? contextCount;
+  const shouldShowNotifications =
+    showNotifications && (unreadCountProp !== undefined || notificationsEnabled);
 
   return (
     <header
@@ -61,6 +73,15 @@ export function ConsoleHeader({
       </div>
 
       <div className="flex items-center gap-2">
+        {shouldShowNotifications ? (
+          <NotificationBell
+            href="/console/notifications"
+            unreadCount={unreadCount}
+            className="h-9 w-9"
+            iconClassName="h-4 w-4"
+          />
+        ) : null}
+
         <Button
           variant="ghost"
           size="icon"
@@ -76,7 +97,10 @@ export function ConsoleHeader({
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-9 w-9">
-                <AvatarImage src={user?.avatarUrl ?? undefined} alt={user?.name ?? "User"} />
+                <AvatarImage
+                  src={user?.avatarUrl ?? undefined}
+                  alt={user?.name ?? "User"}
+                />
                 <AvatarFallback className="bg-primary/10 text-primary">
                   {getInitials(user?.name, user?.email)}
                 </AvatarFallback>

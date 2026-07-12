@@ -12,7 +12,10 @@ import {
 import {
   getProductReviewCount,
   getProductReviews,
+  getUserReviewForProduct,
+  userHasPurchasedProduct,
 } from "@/modules/reviews/queries";
+import { getCurrentUser } from "@/modules/auth/actions";
 
 function toProductCardData(product: ProductListItem): ProductCardData {
   return {
@@ -41,14 +44,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const [reviews, reviewCount, relatedResult] = await Promise.all([
-    getProductReviews(product.id),
-    getProductReviewCount(product.id),
-    getProducts({
-      category: product.category.slug,
-      limit: 5,
-    }),
-  ]);
+  const user = await getCurrentUser();
+
+  const [reviews, reviewCount, relatedResult, hasPurchased, existingReview] =
+    await Promise.all([
+      getProductReviews(product.id),
+      getProductReviewCount(product.id),
+      getProducts({
+        category: product.category.slug,
+        limit: 5,
+      }),
+      user ? userHasPurchasedProduct(user.id, product.id) : Promise.resolve(false),
+      user
+        ? getUserReviewForProduct(user.id, product.id)
+        : Promise.resolve(null),
+    ]);
 
   const relatedProducts = relatedResult.products
     .filter((p) => p.id !== product.id)
@@ -56,6 +66,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .map(toProductCardData);
 
   const primaryImage = product.images[0]?.url ?? "/placeholder.svg";
+
+  const reviewEligibility = {
+    isLoggedIn: !!user,
+    hasPurchased,
+    hasExistingReview: !!existingReview,
+  };
+
+  const mappedReviews = reviews.map((r) => ({
+    id: r.id,
+    rating: r.rating,
+    comment: r.comment,
+    createdAt: new Date(r.createdAt).toISOString(),
+    userName: r.user.name ?? "Anonymous",
+  }));
+
+  const productPayload = {
+    id: product.id,
+    title: product.title,
+    slug: product.slug,
+    description: product.description,
+    price: Number(product.price),
+    discountPrice: product.discountPrice
+      ? Number(product.discountPrice)
+      : undefined,
+    stock: product.stock,
+    rating: product.rating,
+    reviewCount,
+    image: primaryImage,
+    brandName: product.brand?.name,
+    categoryName: product.category.name,
+    categorySlug: product.category.slug,
+  };
 
   return (
     <div className="container-custom py-8">
@@ -83,23 +125,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <ProductDetailClient
           section="purchase"
-          product={{
-            id: product.id,
-            title: product.title,
-            slug: product.slug,
-            description: product.description,
-            price: Number(product.price),
-            discountPrice: product.discountPrice
-              ? Number(product.discountPrice)
-              : undefined,
-            stock: product.stock,
-            rating: product.rating,
-            reviewCount,
-            image: primaryImage,
-            brandName: product.brand?.name,
-            categoryName: product.category.name,
-            categorySlug: product.category.slug,
-          }}
+          product={productPayload}
           variants={product.variants.map((v) => ({
             id: v.id,
             size: v.size,
@@ -108,13 +134,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             stock: v.stock,
             priceDelta: Number(v.priceDelta),
           }))}
-          reviews={reviews.map((r) => ({
-            id: r.id,
-            rating: r.rating,
-            comment: r.comment,
-            createdAt: new Date(r.createdAt).toISOString(),
-            userName: r.user.name ?? "Anonymous",
-          }))}
+          reviews={mappedReviews}
           relatedProducts={relatedProducts}
         />
       </div>
@@ -122,32 +142,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <div className="mt-12">
         <ProductDetailClient
           section="details"
-          product={{
-            id: product.id,
-            title: product.title,
-            slug: product.slug,
-            description: product.description,
-            price: Number(product.price),
-            discountPrice: product.discountPrice
-              ? Number(product.discountPrice)
-              : undefined,
-            stock: product.stock,
-            rating: product.rating,
-            reviewCount,
-            image: primaryImage,
-            brandName: product.brand?.name,
-            categoryName: product.category.name,
-            categorySlug: product.category.slug,
-          }}
+          product={productPayload}
           variants={[]}
-          reviews={reviews.map((r) => ({
-            id: r.id,
-            rating: r.rating,
-            comment: r.comment,
-            createdAt: new Date(r.createdAt).toISOString(),
-            userName: r.user.name ?? "Anonymous",
-          }))}
+          reviews={mappedReviews}
           relatedProducts={relatedProducts}
+          reviewEligibility={reviewEligibility}
         />
       </div>
     </div>
